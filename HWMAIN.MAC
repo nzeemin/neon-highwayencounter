@@ -7,7 +7,7 @@
 	MOV	(SP)+,RR
 .ENDM
 
-; Переключение на основной режим памяти
+; п÷п╣я─п╣п╨п╩я▌я┤п╣п╫п╦п╣ п╫п╟ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 .MACRO	MMODE1
 	MOV	@#UR4BAK, @#161230
 	MOV	@#UR5BAK, @#161232
@@ -20,59 +20,50 @@
 
 ;------------------------------------------------------------------------------
 
-SCREEN = 100000 + <26.*64.>	; Начало экрана 256. x 192.
-SCRIND = SCREEN + <160.*64.>	; Начало панели индикаторов
+SCREEN = 100000 + <26.*64.>	; п²п╟я┤п╟п╩п╬ я█п╨я─п╟п╫п╟ 256. x 192.
+SCRIND = SCREEN + <160.*64.>	; п²п╟я┤п╟п╩п╬ п©п╟п╫п╣п╩п╦ п╦п╫п╢п╦п╨п╟я┌п╬я─п╬п╡
 
-; Режимы для регистра управления памятью
-;          .___1___...00.00
-;MMODE0 = ^B0001110000000000	; 5:4  -  системный
-;MMODE1 = ^B0011100000000000	; 3:1  -  основной
-;MMODE2 = ^B0011101000000000	; 3:2  -  под прешифты
-MMODE4 = ^B0011110000000000	; 3:4  -  для загрузки
-;MMODE5 = ^B0011100100000000	; 3:5  -  для рисования на экране
-;MMODE6 = ^B0011111100000000	; 3:6  -  под прешифты
-
-PXCONV = 001000			; Адрес таблицы конвертации пикселей
+PXCONV = 001000			; п░п╢я─п╣я│ я┌п╟п╠п╩п╦я├я▀ п╨п╬п╫п╡п╣я─я┌п╟я├п╦п╦ п©п╦п╨я│п╣п╩п╣п╧
 
 ;------------------------------------------------------------------------------
-; Переменные из HWBOOT
+; п÷п╣я─п╣п╪п╣п╫п╫я▀п╣ п╦п╥ HWBOOT
 
-BTVARS   = 001764	; Адрес переменных
-BTVARL   = 6.		; Длина в словах
+BTVARS   = 001764	; п░п╢я─п╣я│ п©п╣я─п╣п╪п╣п╫п╫я▀я┘
+BTVARL   = 6.		; п■п╩п╦п╫п╟ п╡ я│п╩п╬п╡п╟я┘
 
 ;------------------------------------------------------------------------------
 
 	.ASECT
 	.=002000
 
-; Сюда приходим из HWBOOT; установлен основной режим памяти
+; п║я▌п╢п╟ п©я─п╦я┘п╬п╢п╦п╪ п╦п╥ HWBOOT; я┐я│я┌п╟п╫п╬п╡п╩п╣п╫ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 START::
 	MTPS	#340			; disable all interruptions
-	MOV	SP, OSTACK		; Сохраняем начальное значение SP
+	MOV	SP, OSTACK		; п║п╬я┘я─п╟п╫я▐п╣п╪ п╫п╟я┤п╟п╩я▄п╫п╬п╣ п╥п╫п╟я┤п╣п╫п╦п╣ SP
 	MOV	#1000, SP
 ;	MOV	#000004, R0
-;	MOV	#STOP, (R0)+		; Вектор обработки клавиши СТОП
+;	MOV	#STOP, (R0)+		; п▓п╣п╨я┌п╬я─ п╬п╠я─п╟п╠п╬я┌п╨п╦ п╨п╩п╟п╡п╦я┬п╦ п║п╒п·п÷
 ;	MOV	#340, (R0)
-	;MMODE1				; Включаем основной режим памяти
+	;MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 
-; Копируем переменные из HWBOOT
-	MOV	#BTVARS, R0		; Откуда
-	MOV	#BTVARL, R1		; Сколько
-	MOV	#UR4BAK, R2		; Куда
+; п п╬п©п╦я─я┐п╣п╪ п©п╣я─п╣п╪п╣п╫п╫я▀п╣ п╦п╥ HWBOOT
+	MOV	#BTVARS, R0		; п·я┌п╨я┐п╢п╟
+	MOV	#BTVARL, R1		; п║п╨п╬п╩я▄п╨п╬
+	MOV	#UR4BAK, R2		; п я┐п╢п╟
 10$:	MOV	(R0)+, (R2)+
 	SOB	R1, 10$
 
-; Подготовительные операции перед стартом: таблицы, прешифты
+; п÷п╬п╢пЁп╬я┌п╬п╡п╦я┌п╣п╩я▄п╫я▀п╣ п╬п©п╣я─п╟я├п╦п╦ п©п╣я─п╣п╢ я│я┌п╟я─я┌п╬п╪: я┌п╟п╠п╩п╦я├я▀, п©я─п╣я┬п╦я└я┌я▀
 	CALL	PREPAR
 
-; Вывести надпись PRESS ANY KEY
+; п▓я▀п╡п╣я│я┌п╦ п╫п╟п╢п©п╦я│я▄ PRESS ANY KEY
 	MOV	#LB839, R3		; "PRESS ANY KEY"
 	CALL	LB890			; Print text
-	CALL	WTKEY			; Ожидание нажатой клавиши
+	CALL	WTKEY			; п·п╤п╦п╢п╟п╫п╦п╣ п╫п╟п╤п╟я┌п╬п╧ п╨п╩п╟п╡п╦я┬п╦
 
-; Сюда переходим по нажатию клавиши СТОП
+; п║я▌п╢п╟ п©п╣я─п╣я┘п╬п╢п╦п╪ п©п╬ п╫п╟п╤п╟я┌п╦я▌ п╨п╩п╟п╡п╦я┬п╦ п║п╒п·п÷
 ;STOP:	MOV	#1000, SP
-;	MMODE1				; Включаем основной режим памяти
+;	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 
 ;	CALL	CLRSCR
 
@@ -88,26 +79,26 @@ START::
 
 	JMP	LB0DE		; Start point
 
-; Эти переменные мы копируем из HWBOOT
-UR4BAK:	.WORD	0		; Исходное значение UR4
-UR5BAK:	.WORD	0		; Исходное значение UR5
-SCRUR4:	.WORD	0		; Значение UR4 для экрана
-SCRUR5:	.WORD	0		; Значение UR5 для экрана
+; п╜я┌п╦ п©п╣я─п╣п╪п╣п╫п╫я▀п╣ п╪я▀ п╨п╬п©п╦я─я┐п╣п╪ п╦п╥ HWBOOT
+UR4BAK:	.WORD	0		; п≤я│я┘п╬п╢п╫п╬п╣ п╥п╫п╟я┤п╣п╫п╦п╣ UR4
+UR5BAK:	.WORD	0		; п≤я│я┘п╬п╢п╫п╬п╣ п╥п╫п╟я┤п╣п╫п╦п╣ UR5
+SCRUR4:	.WORD	0		; п≈п╫п╟я┤п╣п╫п╦п╣ UR4 п╢п╩я▐ я█п╨я─п╟п╫п╟
+SCRUR5:	.WORD	0		; п≈п╫п╟я┤п╣п╫п╦п╣ UR5 п╢п╩я▐ я█п╨я─п╟п╫п╟
 AREAID:	.WORD	0		; Area ID
 VIEWID:	.WORD	0		; View ID
 
-OSTACK:	.WORD	001000			; Начальное значение SP
+OSTACK:	.WORD	001000			; п²п╟я┤п╟п╩я▄п╫п╬п╣ п╥п╫п╟я┤п╣п╫п╦п╣ SP
 
 FINISH:
 	CALL	CLRSCR
-;TODO: Удалить VIEW и AREA
-;TODO: Освободить память
-	MOV	OSTACK, SP		; Восстанавливаем стек
+;TODO: пёп╢п╟п╩п╦я┌я▄ VIEW п╦ AREA
+;TODO: п·я│п╡п╬п╠п╬п╢п╦я┌я▄ п©п╟п╪я▐я┌я▄
+	MOV	OSTACK, SP		; п▓п╬я│я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣п╪ я│я┌п╣п╨
 	HALT ;STUB
 
-; Подпрограмма очистки экрана
+; п÷п╬п╢п©я─п╬пЁя─п╟п╪п╪п╟ п╬я┤п╦я│я┌п╨п╦ я█п╨я─п╟п╫п╟
 CLRSCR:
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#100000, R2
 	MOV	#2048., R3
 1$:	CLR	(R2)+
@@ -115,7 +106,7 @@ CLRSCR:
 	CLR	(R2)+
 	CLR	(R2)+		; loop unroll x8
 	SOB	R3, 1$
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	RETURN
 
 ;------------------------------------------------------------------------------
@@ -145,7 +136,7 @@ L7A00:	; Table with sprite addresses
 ;   +$03,+$04 -- this plus current zone offset ($8F03) gives address on the screen
 ;   +$05 -- base sprite number, index in 7A00 table
 ;   +$06 -- movement pattern: 000 = Vorton, 006 = Fire, 012 = Block, 026 = Flat blocker, 032 = Barrel
-;   +$07 -- direction, copied from (IX+$0я) AND $07, values 0..7
+;   +$07 -- direction, copied from (IX+$0я▐) AND $07, values 0..7
 ;   +$08 -- movement flags ?? 0 = stop, 1 = move; bit 7 = 1: explosion
 ;   +$09 -- horz offset (bits 2-3 only)
 ;   +$0A -- offset from $8F00, where we have sprite number: 015,017,020,021,022,023
@@ -509,7 +500,7 @@ L8E00:	.BYTE	000,002,000,004,340,377,341,377, 377,001,000,004,000,000,001,000
 ;------------------------------------------------------------------------------
 
 ; Variables
-; NOTE: Часть переменных находится из кода как ($8F00 + смещение), поэтому важно смещение от начала области переменных
+; NOTE: п╖п╟я│я┌я▄ п©п╣я─п╣п╪п╣п╫п╫я▀я┘ п╫п╟я┘п╬п╢п╦я┌я│я▐ п╦п╥ п╨п╬п╢п╟ п╨п╟п╨ ($8F00 + я│п╪п╣я┴п╣п╫п╦п╣), п©п╬я█я┌п╬п╪я┐ п╡п╟п╤п╫п╬ я│п╪п╣я┴п╣п╫п╦п╣ п╬я┌ п╫п╟я┤п╟п╩п╟ п╬п╠п╩п╟я│я┌п╦ п©п╣я─п╣п╪п╣п╫п╫я▀я┘
 L8F00:	.BYTE	001	; Zone number?
 	.BYTE	0	; Filler
 L8F01:	.WORD	L8A00	; Object table address, 16 bytes per record; first record is currently active Vorton
@@ -646,12 +637,12 @@ L911F:				; 911F	LD A,$BF
 	CALL	LB890		; 912A	CALL $B890	Print text
 	CALL	WTKEY			; Wait for any key pressed
 ; Clear the "PAUSE MODE" sign
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#<SCREEN+<148.*64.>>, R2	; Addr on the screen
 	MOV	#<8.*32.>, R1		; 8 lines on the screen
 1$:	CLR	(R2)+			; clear
 	SOB	R1, 1$
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 
 L9163:	CALL	L9822		; 9163	CALL $9822	Remove objects from the shadow screen
 	CALL	LA03B		; 9166	CALL $A03B	Objects logic
@@ -703,11 +694,11 @@ L918C:	MOV	L8F1A, R3	; 918C	LD HL,($8F1A)	get Mission Time low counter
 	SOB	R4, 1$
 	BIC	#^B1010101110101011, R0
 	MOV	#7, R1		; 91A6	LD B,$07	7 lines
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 L91A8:	MOV	R0, (R2)	; 91A8	LD (HL),A
 	ADD	#64., R2	; 91A9	INC H		next line
 	SOB	R1, L91A8	; 91AA	DJNZ $91A8
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 				; 91AC	LD A,L
 	MOVB	L8F19, R0	; 91AD	CP $D4
 	BNE	L91C0		; 91AF	JP NC,$91C0
@@ -756,7 +747,7 @@ L91EB:	MOVB	(R3), R0	; 91EB	LD A,(HL)
 	ASL	R1
 	ADD	R1, R2
 	MOV	#4., R1			; 4 lines
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 1$:	CLR	R0
 	BISB	(R3)+, R0		; get byte
 	ASL	R0
@@ -770,7 +761,7 @@ L91EB:	MOVB	(R3), R0	; 91EB	LD A,(HL)
 	ADD	#<64.-2>, R2
 	ADD	#<32.-1>, R3
 	SOB	R1, 1$
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	POP	R3		; 921B	POP HL		HL points to (+$08)
 	DEC	R3		; 921C	DEC L
 	DEC	R3		; 921D	DEC L		HL points to (+$06)
@@ -873,7 +864,7 @@ L935A:	MOV	R0, R1		; 935A	LD B,A
 	MOV	R0, R5		; 9364	LD C,A		lower digit
 	BR	L936F		; 9365	JR $936F
 L9367:	CLR	R1		; 9367	LD B,$00
-L9369:	INC	R1		; 9369	INC B		в B набираем старшую десятичную цифру
+L9369:	INC	R1		; 9369	INC B		п╡ B п╫п╟п╠п╦я─п╟п╣п╪ я│я┌п╟я─я┬я┐я▌ п╢п╣я│я▐я┌п╦я┤п╫я┐я▌ я├п╦я└я─я┐
 	SUB	R5, R0		; 936A	SUB C		-10.
 	CMP	R0, R5		; 936B	CP C		< 10. ?
 	BHIS	L9369		; 936C	JR NC,$9369	no => jump
@@ -882,7 +873,7 @@ L936F:	MOV	R1, R0		; 936F	LD A,B		working with upper digit
 	ADD	R0, R0		; 9370	ADD A,A		= X*2
 	ADD	R1, R0		; 9371	ADD A,B		= X*2+X
 	ADD	R0, R0		; 9372	ADD A,A		= (X*2+X)*2 = X*6
-	MOV	#L94F9, R3	; 9373	LD HL,$94F9	адрес списка с индексами спрайтов для больших цифр
+	MOV	#L94F9, R3	; 9373	LD HL,$94F9	п╟п╢я─п╣я│ я│п©п╦я│п╨п╟ я│ п╦п╫п╢п╣п╨я│п╟п╪п╦ я│п©я─п╟п╧я┌п╬п╡ п╢п╩я▐ п╠п╬п╩я▄я┬п╦я┘ я├п╦я└я─
 	MOV	R0, R2		; 9376	LD D,$00
 				; 9378	LD E,A
 	MOV	R5, R0		; 9379	LD A,C		get lower digit
@@ -891,9 +882,9 @@ L936F:	MOV	R1, R0		; 936F	LD A,B		working with upper digit
 	ADD	R0, R0		; 937C	ADD A,A		= (X*2+X)*2 = X*6
 	PUSH	R0		; 937D	EX AF,AF'
 	ADD	R2, R3		; 937E	ADD HL,DE
-	MOV	#L95E3, R4	; 937F	LD IX,$95E3	адрес массива адресов на экране для цифр ZONE
+	MOV	#L95E3, R4	; 937F	LD IX,$95E3	п╟п╢я─п╣я│ п╪п╟я│я│п╦п╡п╟ п╟п╢я─п╣я│п╬п╡ п╫п╟ я█п╨я─п╟п╫п╣ п╢п╩я▐ я├п╦я└я─ ZONE
 	CALL	L9394		; 9383	CALL $9394	show first ZONE digit
-	MOV	#L94F9, R3	; 9386	LD HL,$94F9	адрес списка с индексами спрайтов для больших цифр
+	MOV	#L94F9, R3	; 9386	LD HL,$94F9	п╟п╢я─п╣я│ я│п©п╦я│п╨п╟ я│ п╦п╫п╢п╣п╨я│п╟п╪п╦ я│п©я─п╟п╧я┌п╬п╡ п╢п╩я▐ п╠п╬п╩я▄я┬п╦я┘ я├п╦я└я─
 				; 9389	LD D,$00
 	POP	R0		; 938B	EX AF,AF'
 				; 938C	LD E,A
@@ -902,11 +893,11 @@ L936F:	MOV	R1, R0		; 936F	LD A,B		working with upper digit
 	BR	L93B7		; 9391	JP $93B7
 
 ; Procedure: Draw digit with size of 16x24 pixels into the ZONE indicator
-; R3 = адрес массива из 6-ти номеров спрайтов 8x8
-; R4 = адрес массива из 6-ти адресов на экране
-L9394:	MMODE5				; Включаем режим памяти 5
-	MOV	#6, R5		; 9394	LD C,$06	нужно вывести 6. спрайтов
-L9396:	MOVB	(R3)+, R2	; 9396	LD E,(HL)	взяли номер спрайта
+; R3 = п╟п╢я─п╣я│ п╪п╟я│я│п╦п╡п╟ п╦п╥ 6-я┌п╦ п╫п╬п╪п╣я─п╬п╡ я│п©я─п╟п╧я┌п╬п╡ 8x8
+; R4 = п╟п╢я─п╣я│ п╪п╟я│я│п╦п╡п╟ п╦п╥ 6-я┌п╦ п╟п╢я─п╣я│п╬п╡ п╫п╟ я█п╨я─п╟п╫п╣
+L9394:	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
+	MOV	#6, R5		; 9394	LD C,$06	п╫я┐п╤п╫п╬ п╡я▀п╡п╣я│я┌п╦ 6. я│п©я─п╟п╧я┌п╬п╡
+L9396:	MOVB	(R3)+, R2	; 9396	LD E,(HL)	п╡п╥я▐п╩п╦ п╫п╬п╪п╣я─ я│п©я─п╟п╧я┌п╟
 	PUSH	R3		; 9397	PUSH HL
 				; 9398	LD D,$00
 	MOV	R2, R3		; 939A	LD HL,$953B
@@ -914,12 +905,12 @@ L9396:	MOVB	(R3)+, R2	; 9396	LD E,(HL)	взяли номер спрайта
 	ADD	R3, R3		; 939E	ADD HL,HL
 	ADD	R3, R3		; 939F	ADD HL,HL
 	ADD	R3, R3		; 93A0	ADD HL,HL	*8.
-	ADD	#L953B, R3	; 93A1	ADD HL,DE	получили адрес спрайта 8x8
+	ADD	#L953B, R3	; 93A1	ADD HL,DE	п©п╬п╩я┐я┤п╦п╩п╦ п╟п╢я─п╣я│ я│п©я─п╟п╧я┌п╟ 8x8
 	MOV	(R4)+, R2	; 93A2	LD E,(IX+$00)	address on the screen
 				; 93A5	LD D,$50
 	MOV	#8., R1		; 93A7	LD B,$08	counter = 8.
 L93A9:	CLR	R0
-	BISB	(R3)+, R0	; 93A9	LD A,(HL)	получаем 8 пикселов спрайта
+	BISB	(R3)+, R0	; 93A9	LD A,(HL)	п©п╬п╩я┐я┤п╟п╣п╪ 8 п©п╦п╨я│п╣п╩п╬п╡ я│п©я─п╟п╧я┌п╟
 	ASL	R0		; 93AA	LD (DE),A	write into screen
 	MOV	PXCONV(R0), R0		; Convert pixels
 	ASL	R0
@@ -931,7 +922,7 @@ L93A9:	CLR	R0
 				; 93B1	INC IX
 				; 93B3	DEC C
 	SOB	R5, L9396	; 93B4	JR NZ,$9396	repeat
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	RETURN			; 93B6	RET
 
 ; We come here after we drawn ZONE digits
@@ -998,21 +989,21 @@ L941A:	ADD	R1, R4		; 941A	ADD IX,BC	|  next record
 ; Routine: Initializing objects tables
 ; called before starting animation
 L9423:
-	MOV	#L8A00, R4	; 9423	LD IX,$8A00	адрес таблицы объектов
-	MOVB	#14., 12(R4)	; 9427	LD (IX+$0A),$0E	 индекс спрайта -- первая запись это Vorton
-	CLRB	6(R4)		; 942B	LD (IX+$06),$00	 movement pattern -- обычное
-	MOV	#16., R2	; 942F	LD DE,$0010	ширина записи = 16.
-	MOVB	#4, R1		; 9432	LD B,$04	счётчик цикла
+	MOV	#L8A00, R4	; 9423	LD IX,$8A00	п╟п╢я─п╣я│ я┌п╟п╠п╩п╦я├я▀ п╬п╠я┼п╣п╨я┌п╬п╡
+	MOVB	#14., 12(R4)	; 9427	LD (IX+$0A),$0E	 п╦п╫п╢п╣п╨я│ я│п©я─п╟п╧я┌п╟ -- п©п╣я─п╡п╟я▐ п╥п╟п©п╦я│я▄ я█я┌п╬ Vorton
+	CLRB	6(R4)		; 942B	LD (IX+$06),$00	 movement pattern -- п╬п╠я▀я┤п╫п╬п╣
+	MOV	#16., R2	; 942F	LD DE,$0010	я┬п╦я─п╦п╫п╟ п╥п╟п©п╦я│п╦ = 16.
+	MOVB	#4, R1		; 9432	LD B,$04	я│я┤я▒я┌я┤п╦п╨ я├п╦п╨п╩п╟
 L9434:	ADD	R2, R4		; 9434	ADD IX,DE	<
 	MOVB	#13., 12(R4)	; 9436	LD (IX+$0A),$0D	|  sprite index
 	MOVB	#16., 6(R4)	; 943A	LD (IX+$06),$10	|  movement pattern
-	SOB	R1, L9434	; 943E	DJNZ $9434	продолжаем цикл
-	MOV	#L8A90, R3	; 9440	LD HL,$8A90	адрес таблицы
-	MOVB	#377, (R3)	; 9443	LD (HL),$FF	очищаем таблицу
+	SOB	R1, L9434	; 943E	DJNZ $9434	п©я─п╬п╢п╬п╩п╤п╟п╣п╪ я├п╦п╨п╩
+	MOV	#L8A90, R3	; 9440	LD HL,$8A90	п╟п╢я─п╣я│ я┌п╟п╠п╩п╦я├я▀
+	MOVB	#377, (R3)	; 9443	LD (HL),$FF	п╬я┤п╦я┴п╟п╣п╪ я┌п╟п╠п╩п╦я├я┐
 ; Preparing global objects table
 	MOV	#L7B00, R4	; 9445	LD IX,$7B00	global objects table
-	MOV	#249., R1	; 9449	LD B,$F9	счётчик цикла = 249.
-L944B:	PUSH	R1		; 944B	PUSH BC		+1, сохраняем счётчик
+	MOV	#249., R1	; 9449	LD B,$F9	я│я┤я▒я┌я┤п╦п╨ я├п╦п╨п╩п╟ = 249.
+L944B:	PUSH	R1		; 944B	PUSH BC		+1, я│п╬я┘я─п╟п╫я▐п╣п╪ я│я┤я▒я┌я┤п╦п╨
 	MOV	#L8F4A, R3	; 944C	LD HL,$8F4A
 	MOVB	6(R4), R0	; 944F	LD A,(IX+$06)	movement pattern
 	BIC	#177420, R0	; 9452	RES 4,A
@@ -1030,10 +1021,10 @@ L9468:	BIC	#177760, R0	; 9468	AND $0F
 				; 946B	LD E,A
 	ADD	R0, R3		; 946C	ADD HL,DE
 	MOVB	(R3)+, R0	; 946D	LD A,(HL)
-	MOVB	R0, 5(R4)	; 946E	LD (IX+$05),A	фаза спрайта ??
+	MOVB	R0, 5(R4)	; 946E	LD (IX+$05),A	я└п╟п╥п╟ я│п©я─п╟п╧я┌п╟ ??
 				; 9471	INC HL
 	MOVB	(R3), R0	; 9472	LD A,(HL)
-	MOVB	R0, 13(R4)	; 9473	LD (IX+$0B),A	записываем номер процедуры
+	MOVB	R0, 13(R4)	; 9473	LD (IX+$0B),A	п╥п╟п©п╦я│я▀п╡п╟п╣п╪ п╫п╬п╪п╣я─ п©я─п╬я├п╣п╢я┐я─я▀
 	MOV	R4, R2		; 9476	LD E,IXl
 				; 9478	LD D,IXh
 				; 947A	LD BC,$000D
@@ -1109,7 +1100,7 @@ L94EE:	ADD	#16., R4	; 94EE	LD DE,$0010	next IX record
 	POP	R1		; 94F3	POP BC		0, restore counter
 	DEC	R1		; 94F4	DEC B
 	BEQ	1$
-	JMP	L944B		; 94F5	JP NZ,$944B	повтор цикла
+	JMP	L944B		; 94F5	JP NZ,$944B	п©п╬п╡я┌п╬я─ я├п╦п╨п╩п╟
 1$:	RETURN			; 94F8	RET
 
 ; Data block -- Sprite indices for ZONE digits
@@ -1151,14 +1142,14 @@ L953B:	.BYTE	000,000,000,000,000,000,000,000
 L9536:	.BYTE	000,000,000,000,000
 	.EVEN
 ;NOTE: Data block L953B: big digits sprites -- moved to SPRITE.MAC
-; Data block: Адреса на экране -- позиции спрайтов для цифр ZONE
-SCRZNE = SCRIND + <8.*64.> + 2  ; Базовый адрес для цифр ZONE
-L95E3:	.WORD	<SCRZNE+0>,<SCRZNE+2>,<SCRZNE+1000>,<SCRZNE+1002>,<SCRZNE+2000>,<SCRZNE+2002>	; старшая цифра
-	.WORD	<SCRZNE+4>,<SCRZNE+6>,<SCRZNE+1004>,<SCRZNE+1006>,<SCRZNE+2004>,<SCRZNE+2006>	; младшая цифра
+; Data block: п░п╢я─п╣я│п╟ п╫п╟ я█п╨я─п╟п╫п╣ -- п©п╬п╥п╦я├п╦п╦ я│п©я─п╟п╧я┌п╬п╡ п╢п╩я▐ я├п╦я└я─ ZONE
+SCRZNE = SCRIND + <8.*64.> + 2  ; п▒п╟п╥п╬п╡я▀п╧ п╟п╢я─п╣я│ п╢п╩я▐ я├п╦я└я─ ZONE
+L95E3:	.WORD	<SCRZNE+0>,<SCRZNE+2>,<SCRZNE+1000>,<SCRZNE+1002>,<SCRZNE+2000>,<SCRZNE+2002>	; я│я┌п╟я─я┬п╟я▐ я├п╦я└я─п╟
+	.WORD	<SCRZNE+4>,<SCRZNE+6>,<SCRZNE+1004>,<SCRZNE+1006>,<SCRZNE+2004>,<SCRZNE+2006>	; п╪п╩п╟п╢я┬п╟я▐ я├п╦я└я─п╟
 
 ; Prepare shadow screen, show the screen
 L95EF:
-; Заполняем область маркеров отрисовки
+; п≈п╟п©п╬п╩п╫я▐п╣п╪ п╬п╠п╩п╟я│я┌я▄ п╪п╟я─п╨п╣я─п╬п╡ п╬я┌я─п╦я│п╬п╡п╨п╦
 	MOV	#LFD00, R3	; 95EF	LD HL,$FD00
 				; 95F2	LD DE,$FD01
 	MOV	#576., R1	; 95F5	LD (HL),$07
@@ -1240,9 +1231,9 @@ L965D:	MOVB	#12., L9658	; 965D	LD A,$0C
 	ADD	#L6AD0, R3	; 9670	LD DE,$6AD0
 				; 9673	ADD HL,DE
 	MOV	#<LD900+5>, R4	; 9674	LD IX,$D905
-	MOV	#LFD00, R2	; 9678	LD DE,$FD00	адрес области маркеров отрисовки
+	MOV	#LFD00, R2	; 9678	LD DE,$FD00	п╟п╢я─п╣я│ п╬п╠п╩п╟я│я┌п╦ п╪п╟я─п╨п╣я─п╬п╡ п╬я┌я─п╦я│п╬п╡п╨п╦
 	MOV	#12., R1	; 967B	LD C,$0C
-L967D:	MOVB	(R3), R0	; 967D	LD A,(HL)	Начало цикла рисования верхних столбцов фона
+L967D:	MOVB	(R3), R0	; 967D	LD A,(HL)	п²п╟я┤п╟п╩п╬ я├п╦п╨п╩п╟ я─п╦я│п╬п╡п╟п╫п╦я▐ п╡п╣я─я┘п╫п╦я┘ я│я┌п╬п╩п╠я├п╬п╡ я└п╬п╫п╟
 	BIC	#177400, R0
 	MOV	R3, L9659	; 967E	LD ($9659),HL
 	PUSH	R4		; 9681	PUSH IX
@@ -1256,7 +1247,7 @@ L967D:	MOVB	(R3), R0	; 967D	LD A,(HL)	Начало цикла рисования верхних столбцов фо
 				; 968B	LD E,L
 	ASL	R3		; 968C	ADD HL,HL
 	ADD	R2, R3		; 968D	ADD HL,DE	HL = A * 12.
-				; 968E	LD DE,$650C	блок последовательностей паттернов
+				; 968E	LD DE,$650C	п╠п╩п╬п╨ п©п╬я│п╩п╣п╢п╬п╡п╟я┌п╣п╩я▄п╫п╬я│я┌п╣п╧ п©п╟я┌я┌п╣я─п╫п╬п╡
 	ADD	#L650C, R3	; 9691	ADD HL,DE
 	MOV	L9658, R0	; 9692	LD A,($9658)
 	MOV	R0, R5		; 9695	LD B,A		height count
@@ -1282,18 +1273,18 @@ L969C:	MOVB	(R3), R2	; 969C	LD E,(HL)
 	ADD	R3, R3		; 96B1	ADD HL,HL
 	ADD	R3, R3		; 96B2	ADD HL,HL
 	ADD	R3, R3		; 96B3	ADD HL,HL	HL = A * 8.
-	ADD	#L7100, R3	; 96B4	LD DE,$7100	адрес блока паттернов
-				; 96B7	ADD HL,DE	в R3 получили адрес тайла
-	MOV	#8., R0		; 96B8	LD A,$08	счётчик строк = 8.
-	MOV	#32., R2	; 96BA	LD DE,$0020	длина строки 32.
+	ADD	#L7100, R3	; 96B4	LD DE,$7100	п╟п╢я─п╣я│ п╠п╩п╬п╨п╟ п©п╟я┌я┌п╣я─п╫п╬п╡
+				; 96B7	ADD HL,DE	п╡ R3 п©п╬п╩я┐я┤п╦п╩п╦ п╟п╢я─п╣я│ я┌п╟п╧п╩п╟
+	MOV	#8., R0		; 96B8	LD A,$08	я│я┤я▒я┌я┤п╦п╨ я│я┌я─п╬п╨ = 8.
+	MOV	#32., R2	; 96BA	LD DE,$0020	п╢п╩п╦п╫п╟ я│я┌я─п╬п╨п╦ 32.
 L96BD:				; 96BD	EX AF,AF'
-	MOVB	(R3)+, (R4)	; 96BE	LD A,(HL)	<  берём 8 пикселей
-				; 96BF	LD (IX+$00),A	|  пишем 8 пикселей
+	MOVB	(R3)+, (R4)	; 96BE	LD A,(HL)	<  п╠п╣я─я▒п╪ 8 п©п╦п╨я│п╣п╩п╣п╧
+				; 96BF	LD (IX+$00),A	|  п©п╦я┬п╣п╪ 8 п©п╦п╨я│п╣п╩п╣п╧
 				; 96C2	INC HL		|
 	ADD	R2, R4		; 96C3	ADD IX,DE	|  to next line
 				; 96C5	EX AF,AF'	|
 	SOB	R0, L96BD	; 96C6	DEC A		|
-				; 96C7	JR NZ,$96BD	повторяем цикл по строкам
+				; 96C7	JR NZ,$96BD	п©п╬п╡я┌п╬я─я▐п╣п╪ я├п╦п╨п╩ п©п╬ я│я┌я─п╬п╨п╟п╪
 	MOV	L965B, R3	; 96C9	LD HL,($965B)
 	INC	R3		; 96CC	INC HL		|
 	SOB	R5, L969C	; 96CD	DJNZ $969C	repeat
@@ -1305,14 +1296,14 @@ L96BD:				; 96BD	EX AF,AF'
 	MOV	L9659, R3	; 96D6	LD HL,($9659)
 	INC	R3		; 96D9	INC HL
 				; 96DA	LD A,IXl	|
-	BITB	#1, R4		; 96DC	BIT 0,A		|  чётный столбец?
-	BEQ	L967D		; 96DE	JR Z,$967D	да => повторяем цикл
-	DECB	L9658		; 96E0	LD A,($9658)	|  уменьшаем высоту столбца
+	BITB	#1, R4		; 96DC	BIT 0,A		|  я┤я▒я┌п╫я▀п╧ я│я┌п╬п╩п╠п╣я├?
+	BEQ	L967D		; 96DE	JR Z,$967D	п╢п╟ => п©п╬п╡я┌п╬я─я▐п╣п╪ я├п╦п╨п╩
+	DECB	L9658		; 96E0	LD A,($9658)	|  я┐п╪п╣п╫я▄я┬п╟п╣п╪ п╡я▀я│п╬я┌я┐ я│я┌п╬п╩п╠я├п╟
 				; 96E3	DEC A		|
 				; 96E4	LD ($9658),A	|
 	DEC	R1		; 96E7	DEC C		|
 	BNE	L967D		; 96E8	JR NZ,$967D	repeat
-; Цикл рисования нижних столбцов фона
+; п╕п╦п╨п╩ я─п╦я│п╬п╡п╟п╫п╦я▐ п╫п╦п╤п╫п╦я┘ я│я┌п╬п╩п╠я├п╬п╡ я└п╬п╫п╟
 	MOVB	#1, L9658	; 96EA	LD A,$01	initial column height
 				; 96EC	LD ($9658),A
 	MOV	#<LE900+269.>, R4	; 96EF	LD IX,$EA0D
@@ -1354,7 +1345,7 @@ L9711:	MOVB	(R3), R2	; 9711	LD E,(HL)
 	ADD	R3, R3		; 9726	ADD HL,HL
 	ADD	R3, R3		; 9727	ADD HL,HL
 	ADD	R3, R3		; 9728	ADD HL,HL	HL = A * 8.
-	ADD	#L7100, R3	; 9729	LD DE,$7100	адрес блока паттернов
+	ADD	#L7100, R3	; 9729	LD DE,$7100	п╟п╢я─п╣я│ п╠п╩п╬п╨п╟ п©п╟я┌я┌п╣я─п╫п╬п╡
 				; 972C	ADD HL,DE
 	MOV	#8., R0		; 972D	LD A,$08
 	MOV	#32., R2	; 972F	LD DE,$0020
@@ -1365,7 +1356,7 @@ L9732:				; 9732	EX AF,AF'
 	ADD	R2, R4		; 9738	ADD IX,DE
 				; 973A	EX AF,AF'
 	SOB	R0, L9732	; 973B	DEC A
-				; 973C	JR NZ,$9732	повторяем цикл по строкам
+				; 973C	JR NZ,$9732	п©п╬п╡я┌п╬я─я▐п╣п╪ я├п╦п╨п╩ п©п╬ я│я┌я─п╬п╨п╟п╪
 	MOV	L965B, R3	; 973E	LD HL,($965B)
 	INC	R3		; 9741	INC HL
 	SOB	R5, L9711	; 9742	DJNZ $9711
@@ -1422,7 +1413,7 @@ L978D:	BISB	#1, (R3)	; 978D	LD A,(HL)
 ; NOTE: 9799..97A4 code fills attributes, removed
 ;
 ; Draw screen D905 on the real screen
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#<LD900+5>, R3	; 97A6	LD HL,$D905
 	MOV	#SCREEN, R2	; 97A9	LD DE,$4000	Screen address
 	MOV	#144., R0	; Number of lines to copy
@@ -1437,17 +1428,17 @@ L978D:	BISB	#1, (R3)	; 978D	LD A,(HL)
 	SOB	R1, 20$
 	POP	R0
 	SOB	R0, 10$
-	MMODE1				; Включаем основной режим памяти
-; Копирование подготовленного теневого экрана на второй теневой экран
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
+; п п╬п©п╦я─п╬п╡п╟п╫п╦п╣ п©п╬п╢пЁп╬я┌п╬п╡п╩п╣п╫п╫п╬пЁп╬ я┌п╣п╫п╣п╡п╬пЁп╬ я█п╨я─п╟п╫п╟ п╫п╟ п╡я┌п╬я─п╬п╧ я┌п╣п╫п╣п╡п╬п╧ я█п╨я─п╟п╫
 	MOV	#<LD900+1005>, R3	; 97DF	LD HL,$DB05
 	MOV	#LEB00, R2	; 97E2	LD DE,$EB00
 	MOV	#256., R1	; 97E5	LD BC,$1000
-1$:	.REPT	16.		; 97E8	LDIR		Копирование основной части, 4096. байт, 128. строк
+1$:	.REPT	16.		; 97E8	LDIR		п п╬п©п╦я─п╬п╡п╟п╫п╦п╣ п╬я│п╫п╬п╡п╫п╬п╧ я┤п╟я│я┌п╦, 4096. п╠п╟п╧я┌, 128. я│я┌я─п╬п╨
 	MOVB	(R3)+, (R2)+
 	.ENDR				; 		loop unroll x16
 	SOB	R1, 1$
 	MOV	#15., R5	; 97EA	LD C,$0F
-	MOV	#2., R4		; 97EC	LD B,$02	Осталось скопировать 2x8 строк
+	MOV	#2., R4		; 97EC	LD B,$02	п·я│я┌п╟п╩п╬я│я▄ я│п╨п╬п©п╦я─п╬п╡п╟я┌я▄ 2x8 я│я┌я─п╬п╨
 	MOV	#<LD900+22.>, R3	; 97EE	LD HL,$D916
 	MOV	#<LE900+17.>, R2	; 97F1	LD DE,$E911
 L97F4:	MOV	#8., R0		; 97F4	LD A,$08
@@ -1489,7 +1480,7 @@ L97F6:	PUSH	R1		; 97F6	PUSH BC
 ; Routine: Remove objects from the second shadow screen
 ; by copying pixels from the first shadow screen
 L9822:
-	MOV	#L8D52, R3	; 9822	LD HL,$8D52	адрес начала таблицы
+	MOV	#L8D52, R3	; 9822	LD HL,$8D52	п╟п╢я─п╣я│ п╫п╟я┤п╟п╩п╟ я┌п╟п╠п╩п╦я├я▀
 	MOVB	(R3), R0	; 9825	LD A,(HL)
 				; 9826	AND A		is the table empty?
 	BEQ	L9859		; 9827	JP Z,$9859	yes => return
@@ -1498,9 +1489,9 @@ L982A:	INC	R3		; 982A	INC L		NOTE: first byte replaced with word
 	MOV	(R3)+, R2	; 982B	LD E,(HL)	NOTE: word aligned
 				; 982C	INC L
 
-				; 982D	LD D,(HL)	DE = адрес записи об объекте
+				; 982D	LD D,(HL)	DE = п╟п╢я─п╣я│ п╥п╟п©п╦я│п╦ п╬п╠ п╬п╠я┼п╣п╨я┌п╣
 			      	; 982E	INC L
-	PUSH	R3		; 982F	PUSH HL		сохраняем адрес в таблице 8D52
+	PUSH	R3		; 982F	PUSH HL		я│п╬я┘я─п╟п╫я▐п╣п╪ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
 	MOV	R2, R3		; 9830	EX DE,HL
 	ADD	#3, R3		; 9831	INC L
 				; 9832	INC L
@@ -1514,8 +1505,8 @@ L982A:	INC	R3		; 982A	INC L		NOTE: first byte replaced with word
 	MOV	R2, R3		; 983A	ADD HL,DE
 				; 983B	LD E,L
 				; 983C	LD D,H
-	CMP	R2, #LFF29 ;DEBUG вышли за границу экрана?
-	BLO	1$	   ;DEBUG нет => переходим
+	CMP	R2, #LFF29 ;DEBUG п╡я▀я┬п╩п╦ п╥п╟ пЁя─п╟п╫п╦я├я┐ я█п╨я─п╟п╫п╟?
+	BLO	1$	   ;DEBUG п╫п╣я┌ => п©п╣я─п╣я┘п╬п╢п╦п╪
 	HALT
 1$:				; 983D	LD BC,$F005	-4091.
 	SUB	#4091., R3	; 9840	ADD HL,BC	minus distance between the screens
@@ -1531,7 +1522,7 @@ L9843:	MOVB	(R3)+, (R2)+	; 9843	LD BC,$0003	<
 	SUB	R1, R3		; 984E	ADD HL,BC	|  one line up
 				; 984F	DEC A		|
 	SOB	R0, L9843	; 9850	JP NZ,$9843	repeat
-	POP	R3		; 9853	POP HL		восстановили адрес в таблице 8D52
+	POP	R3		; 9853	POP HL		п╡п╬я│я│я┌п╟п╫п╬п╡п╦п╩п╦ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
 	MOVB	(R3), R0	; 9854	LD A,(HL)
 				; 9855	AND A		end of table?
 	BNE	L982A		; 9856	JP NZ,$982A	no => continue the loop
@@ -1541,21 +1532,21 @@ L9859:	RETURN			; 9859	RET
 ; Used by the routines at 90F2, A34D, A8C5.
 L985A:
 	MOV	L8F01, R4	; 985A	LD IX,($8F01)	object table address
-	MOV	#L8D52, R3	; 985E	LD HL,$8D52	начало таблицы 8D52
-	MOV	R3, L8F0B	; 9861	LD ($8F0B),HL	сохраняем адрес в таблице 8D52
-	CLR	(R3)		; 9864	LD (HL),$00	очищаем таблицу
+	MOV	#L8D52, R3	; 985E	LD HL,$8D52	п╫п╟я┤п╟п╩п╬ я┌п╟п╠п╩п╦я├я▀ 8D52
+	MOV	R3, L8F0B	; 9861	LD ($8F0B),HL	я│п╬я┘я─п╟п╫я▐п╣п╪ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
+	CLR	(R3)		; 9864	LD (HL),$00	п╬я┤п╦я┴п╟п╣п╪ я┌п╟п╠п╩п╦я├я┐
 L9866:	CLR	R0		; 9866	LD A,(IX+$00)
 	BISB	(R4), R0
-	CMPB	R0, #376	; 9869	CP $FE		пустая запись?
-	BEQ	L98D4		; 986B	JP Z,$98D4	да => пропускаем
-	BHIS	L98DC		; 986E	JP NC,$98DC	конец таблицы => переходим к отрисовке
+	CMPB	R0, #376	; 9869	CP $FE		п©я┐я│я┌п╟я▐ п╥п╟п©п╦я│я▄?
+	BEQ	L98D4		; 986B	JP Z,$98D4	п╢п╟ => п©я─п╬п©я┐я│п╨п╟п╣п╪
+	BHIS	L98DC		; 986E	JP NC,$98DC	п╨п╬п╫п╣я├ я┌п╟п╠п╩п╦я├я▀ => п©п╣я─п╣я┘п╬п╢п╦п╪ п╨ п╬я┌я─п╦я│п╬п╡п╨п╣
 	MOV	R0, R1		; 9871	LD B,A
 	MOVB	6(R4), R0	; 9872	LD A,(IX+$06)	movement pattern
 	BIC	#177400, R0
 	CMPB	R0, #22.	; 9875	CP $16
-	BEQ	L98D4		; 9877	JP Z,$98D4	=> переходим к следующей записи
+	BEQ	L98D4		; 9877	JP Z,$98D4	=> п©п╣я─п╣я┘п╬п╢п╦п╪ п╨ я│п╩п╣п╢я┐я▌я┴п╣п╧ п╥п╟п©п╦я│п╦
 	CMPB	R0, #25.	; 987A	CP $19
-	BEQ	L98D4		; 987C	JP Z,$98D4	=> переходим к следующей записи
+	BEQ	L98D4		; 987C	JP Z,$98D4	=> п©п╣я─п╣я┘п╬п╢п╦п╪ п╨ я│п╩п╣п╢я┐я▌я┴п╣п╧ п╥п╟п©п╦я│п╦
 	MOV	L8F09, R2	; 987F	LD DE,($8F09)	current zone base pos
 	MOVB	2(R4), R3	; 9883	LD L,(IX+$01)
 	BIC	#177400, R3
@@ -1565,51 +1556,51 @@ L9866:	CLR	R0		; 9866	LD A,(IX+$00)
 	SUB	R2, R3		; 988A	SBC HL,DE
 	BIT	#177400, R3	; 988C	LD A,H
 				; 988D	AND A
-	BNE	L98D4		; 988E	JP NZ,$98D4	=> переходим к следующей записи
+	BNE	L98D4		; 988E	JP NZ,$98D4	=> п©п╣я─п╣я┘п╬п╢п╦п╪ п╨ я│п╩п╣п╢я┐я▌я┴п╣п╧ п╥п╟п©п╦я│п╦
 	MOV	R3, R0		; 9891	LD A,L
 	BIC	#177400, R0
 	ASR	R0		; 9892	SRL A
 	ASR	R1		; 9894	SRL B
 	ADD	R1, R0		; 9896	ADD A,B
 	INC	R0		; 9897	INC A
-	MOV	#L8D52, R3	; 9898	LD HL,$8D52	адрес начала таблицы
+	MOV	#L8D52, R3	; 9898	LD HL,$8D52	п╟п╢я─п╣я│ п╫п╟я┤п╟п╩п╟ я┌п╟п╠п╩п╦я├я▀
 L989B:	CMPB	R0, (R3)	; 989B	CP (HL)
 	BHIS	L98A4		; 989C	JR NC,$98A4
-	ADD	#4, R3		; 989E	INC L		NOTE: первый байт записи заменён на слово
+	ADD	#4, R3		; 989E	INC L		NOTE: п©п╣я─п╡я▀п╧ п╠п╟п╧я┌ п╥п╟п©п╦я│п╦ п╥п╟п╪п╣п╫я▒п╫ п╫п╟ я│п╩п╬п╡п╬
 				; 989F	INC L
 				; 98A0	INC L
 	BR	L989B		; 98A1	JP $989B
 L98A4:	MOV	R0, R5		; 98A4	EX AF,AF'	save A
-	MOV	L8F0B, R2	; 98A5	LD DE,($8F0B)	восстанавливаем адрес в таблице 8D52
+	MOV	L8F0B, R2	; 98A5	LD DE,($8F0B)	п╡п╬я│я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣п╪ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
 	CLR	R0		; 98A9	XOR A
-	TSTB	(R3)		; 98AA	CP (HL)		мы в конце таблицы?
-	BNE	L98B8		; 98AB	JR NZ,$98B8	нет => нужно сдвигать блок таблицы
-	ADD	#4, R2		; 98AD	INC E		NOTE: первый байт записи заменён на слово
+	TSTB	(R3)		; 98AA	CP (HL)		п╪я▀ п╡ п╨п╬п╫я├п╣ я┌п╟п╠п╩п╦я├я▀?
+	BNE	L98B8		; 98AB	JR NZ,$98B8	п╫п╣я┌ => п╫я┐п╤п╫п╬ я│п╢п╡п╦пЁп╟я┌я▄ п╠п╩п╬п╨ я┌п╟п╠п╩п╦я├я▀
+	ADD	#4, R2		; 98AD	INC E		NOTE: п©п╣я─п╡я▀п╧ п╠п╟п╧я┌ п╥п╟п©п╦я│п╦ п╥п╟п╪п╣п╫я▒п╫ п╫п╟ я│п╩п╬п╡п╬
 				; 98AE	INC E
 				; 98AF	INC E
-	MOV	R2, L8F0B	; 98B0	LD ($8F0B),DE	Сохраняем адрес
-	CLR	(R2)		; 98B4	LD (DE),A	сначала очищаем
+	MOV	R2, L8F0B	; 98B0	LD ($8F0B),DE	п║п╬я┘я─п╟п╫я▐п╣п╪ п╟п╢я─п╣я│
+	CLR	(R2)		; 98B4	LD (DE),A	я│п╫п╟я┤п╟п╩п╟ п╬я┤п╦я┴п╟п╣п╪
 	BR	L98CA		; 98B5	JP $98CA
 L98B8:	PUSH	R3		; 98B8	PUSH HL
 	MOV	R2, R0		; 98B9	LD A,E
 	SUB	R3, R0		; 98BA	SUB L
 	MOV	R0, R1		; 98BB	LD C,A
 				; 98BC	LD B,$00
-	INC	R1		; 98BE	INC C		приготовили счётчик
+	INC	R1		; 98BE	INC C		п©я─п╦пЁп╬я┌п╬п╡п╦п╩п╦ я│я┤я▒я┌я┤п╦п╨
 	INC	R1
 	MOV	R2, R3		; 98BF	LD L,E
-	ADD	#4, R2		; 98C0	INC E		NOTE: первый байт записи заменён на слово
+	ADD	#4, R2		; 98C0	INC E		NOTE: п©п╣я─п╡я▀п╧ п╠п╟п╧я┌ п╥п╟п©п╦я│п╦ п╥п╟п╪п╣п╫я▒п╫ п╫п╟ я│п╩п╬п╡п╬
 				; 98C1	INC E
 				; 98C2	INC E
-	MOV	R2, L8F0B	; 98C3	LD ($8F0B),DE	сохраняем адрес в таблице 8D52
-1$:	MOVB	(R3), (R2)	; 98C7	LDDR	        сдвигаем блок
+	MOV	R2, L8F0B	; 98C3	LD ($8F0B),DE	я│п╬я┘я─п╟п╫я▐п╣п╪ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
+1$:	MOVB	(R3), (R2)	; 98C7	LDDR	        я│п╢п╡п╦пЁп╟п╣п╪ п╠п╩п╬п╨
 	DEC	R3
 	DEC	R2
 	SOB	R1, 1$
 	POP	R3		; 98C9	POP HL
 L98CA:	MOV	R5, R0		; 98CA	EX AF,AF'	restore A
 	MOVB	R0, (R3)+	; 98CB	LD (HL),A
-	INC	R3		; 98CC	INC L		NOTE: первый байт записи заменён на слово
+	INC	R3		; 98CC	INC L		NOTE: п©п╣я─п╡я▀п╧ п╠п╟п╧я┌ п╥п╟п©п╦я│п╦ п╥п╟п╪п╣п╫я▒п╫ п╫п╟ я│п╩п╬п╡п╬
 	MOV	R4, R2		; 98CD	LD E,IXl
 				; 98CF	LD D,IXh
 	MOV	R2, (R3)	; 98D1	LD (HL),E	NOTE: word aligned
@@ -1618,12 +1609,12 @@ L98CA:	MOV	R5, R0		; 98CA	EX AF,AF'	restore A
 L98D4:				; 98D4	LD DE,$0010
 	ADD	#16., R4	; 98D7	ADD IX,DE	next record by IX
 	BR	L9866		; 98D9	JP $9866
-; Дальше идёт отрисовка объектов по порядку, установленному таблицей $8D52
-L98DC:	MOV	#L8D52, R3	; 98DC	LD HL,$8D52	адрес начала таблицы
+; п■п╟п╩я▄я┬п╣ п╦п╢я▒я┌ п╬я┌я─п╦я│п╬п╡п╨п╟ п╬п╠я┼п╣п╨я┌п╬п╡ п©п╬ п©п╬я─я▐п╢п╨я┐, я┐я│я┌п╟п╫п╬п╡п╩п╣п╫п╫п╬п╪я┐ я┌п╟п╠п╩п╦я├п╣п╧ $8D52
+L98DC:	MOV	#L8D52, R3	; 98DC	LD HL,$8D52	п╟п╢я─п╣я│ п╫п╟я┤п╟п╩п╟ я┌п╟п╠п╩п╦я├я▀
 	MOVB	(R3), R0	; 98DF	LD A,(HL)
 	BNE	L98E2		; 98E0	AND A
 	RETURN			; 98E1	RET Z
-L98E2:	INC	R3		; 98E2	INC L		NOTE: первый байт таблицы заменён на слово
+L98E2:	INC	R3		; 98E2	INC L		NOTE: п©п╣я─п╡я▀п╧ п╠п╟п╧я┌ я┌п╟п╠п╩п╦я├я▀ п╥п╟п╪п╣п╫я▒п╫ п╫п╟ я│п╩п╬п╡п╬
 	INC	R3
 	MOV	(R3)+, R4	; 98E3	LD A,(HL)	NOTE: word aligned
 				; 98E4	LD IXl,A
@@ -1631,7 +1622,7 @@ L98E2:	INC	R3		; 98E2	INC L		NOTE: первый байт таблицы заменён на слово
 				; 98E7	LD A,(HL)
 				; 98E8	LD IXh,A
 				; 98EA	INC L
-	PUSH	R3		; 98EB	PUSH HL		сохраняем адрес в таблице 8D52
+	PUSH	R3		; 98EB	PUSH HL		я│п╬я┘я─п╟п╫я▐п╣п╪ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
 	MOVB	12(R4), R3	; 98EC	LD H,$8F
 	BIC	#177400, R3
 	ADD	#L8F00, R3	; 98EE	LD L,(IX+$0A)	get sprite phase
@@ -1661,8 +1652,8 @@ L98E2:	INC	R3		; 98E2	INC L		NOTE: первый байт таблицы заменён на слово
 	ADD	R1, R3		; 9910	ADD HL,BC
 	MOV	R3, R1		; 9911	LD C,L
 				; 9912	LD B,H		BC = address where to draw the sprite
-	CMP	R1, #LFF29 ;DEBUG вышли за границу экрана?
-	BLO	1$	   ;DEBUG нет => переходим
+	CMP	R1, #LFF29 ;DEBUG п╡я▀я┬п╩п╦ п╥п╟ пЁя─п╟п╫п╦я├я┐ я█п╨я─п╟п╫п╟?
+	BLO	1$	   ;DEBUG п╫п╣я┌ => п©п╣я─п╣я┘п╬п╢п╦п╪
 	HALT
 1$:	PUSH	R3		; 9913	EX (SP),HL	restore HL and set value on stack
 	MOV	R5, R3
@@ -1671,11 +1662,11 @@ L98E2:	INC	R3		; 98E2	INC L		NOTE: первый байт таблицы заменён на слово
 ;NOTE: Code block 9915-9932 replaced with table L9915
 ;NOTE: Procedure 9933 moved below, close to other sprite drawing procedures
 ;
-; Сюда приходим из процедуры 985A после отрисовки спрайта
+; п║я▌п╢п╟ п©я─п╦я┘п╬п╢п╦п╪ п╦п╥ п©я─п╬я├п╣п╢я┐я─я▀ 985A п©п╬я│п╩п╣ п╬я┌я─п╦я│п╬п╡п╨п╦ я│п©я─п╟п╧я┌п╟
 L9980:	POP	R3		; 9980	POP HL		restore the address "where to draw"
 				; 9981	LD A,H
-	CMP	R3, #LE900	; 9982	CP $E9	        рисовали во второй теневой экран?
-	BLO	L99A8		; 9984	JP C,$99A8	нет => пропускаем
+	CMP	R3, #LE900	; 9982	CP $E9	        я─п╦я│п╬п╡п╟п╩п╦ п╡п╬ п╡я┌п╬я─п╬п╧ я┌п╣п╫п╣п╡п╬п╧ я█п╨я─п╟п╫?
+	BLO	L99A8		; 9984	JP C,$99A8	п╫п╣я┌ => п©я─п╬п©я┐я│п╨п╟п╣п╪
 ; Save draw markers for the sprite drawn
 				; 9987	EX DE,HL
 	SUB	#LE900, R3	; 9988	SUB $E9	        calculate offset from the screen start
@@ -1689,12 +1680,12 @@ L9980:	POP	R3		; 9980	POP HL		restore the address "where to draw"
 				; 9992	LD A,E
 	BIC	#177740, R0	; 9993	AND $1F		offset within a single line -- 0..31.
 				; 9995	LD E,A
-	BIS	R0, R3		; 9996	LD D,$FD	добавляем смещение в рамках строки
-	ADD	#LFD00, R3	; 9998	ADD HL,DE	адрес начала области флагов отрисовки
+	BIS	R0, R3		; 9996	LD D,$FD	п╢п╬п╠п╟п╡п╩я▐п╣п╪ я│п╪п╣я┴п╣п╫п╦п╣ п╡ я─п╟п╪п╨п╟я┘ я│я┌я─п╬п╨п╦
+	ADD	#LFD00, R3	; 9998	ADD HL,DE	п╟п╢я─п╣я│ п╫п╟я┤п╟п╩п╟ п╬п╠п╩п╟я│я┌п╦ я└п╩п╟пЁп╬п╡ п╬я┌я─п╦я│п╬п╡п╨п╦
 				; 9999	LD DE,$FFDE	-34.
 	MOV	#2, R0		; 999C	LD A,$02	draw marker
-	MOV	#4, R1		; 999E	LD B,$04	спрайт занимает 3 или 4 знако-строки
-L99A0:	MOVB	R0, (R3)+	; 99A0	LD (HL),A	<  отмечаем к отрисовке 3 знакоместа
+	MOV	#4, R1		; 999E	LD B,$04	я│п©я─п╟п╧я┌ п╥п╟п╫п╦п╪п╟п╣я┌ 3 п╦п╩п╦ 4 п╥п╫п╟п╨п╬-я│я┌я─п╬п╨п╦
+L99A0:	MOVB	R0, (R3)+	; 99A0	LD (HL),A	<  п╬я┌п╪п╣я┤п╟п╣п╪ п╨ п╬я┌я─п╦я│п╬п╡п╨п╣ 3 п╥п╫п╟п╨п╬п╪п╣я│я┌п╟
 				; 99A1	INC HL	        |
 	MOVB	R0, (R3)+	; 99A2	LD (HL),A	|
 				; 99A3	INC HL	        |
@@ -1702,10 +1693,10 @@ L99A0:	MOVB	R0, (R3)+	; 99A0	LD (HL),A	<  отмечаем к отрисовке 3 знакоместа
 	SUB	#34., R3	; 99A5	ADD HL,DE	|  to previous line
 	SOB	R1, L99A0	; 99A6	DJNZ $99A0      repeat
 L99A8:
-	POP	R3		; 99A8	POP HL		восстанавливаем адрес в таблице 8D52
+	POP	R3		; 99A8	POP HL		п╡п╬я│я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣п╪ п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
 	MOVB	(R3), R0	; 99A9	LD A,(HL)
-				; 99AA	AND A	        конец таблицы?
-	BNE	L98E2		; 99AB	JP NZ,$98E2	нет => продолжение большого цикла
+				; 99AA	AND A	        п╨п╬п╫п╣я├ я┌п╟п╠п╩п╦я├я▀?
+	BNE	L98E2		; 99AB	JP NZ,$98E2	п╫п╣я┌ => п©я─п╬п╢п╬п╩п╤п╣п╫п╦п╣ п╠п╬п╩я▄я┬п╬пЁп╬ я├п╦п╨п╩п╟
 ;
 	MOV	#<LFD00+440>, R2	; 99AE	LD DE,$FE20
 	MOV	#<LFD00+400>, R3	; 99B1	LD HL,$FE40
@@ -1730,15 +1721,15 @@ L99C7:	ADD	R1, R3		; 99C7	ADD HL,BC	|  to next line
 				; 99CC	DEC A		|
 	SOB	R5, L99BC	; 99CD	JP NZ,$99BC	repeat loop by lines
 	RETURN 			; 99D0	RET
-; Таблица из 4-х элементов для выбора процедуры отрисовки спрайта
+; п╒п╟п╠п╩п╦я├п╟ п╦п╥ 4-я┘ я█п╩п╣п╪п╣п╫я┌п╬п╡ п╢п╩я▐ п╡я▀п╠п╬я─п╟ п©я─п╬я├п╣п╢я┐я─я▀ п╬я┌я─п╦я│п╬п╡п╨п╦ я│п©я─п╟п╧я┌п╟
 L9915:	.WORD	L99D1	; Draw sprite with shift by 4px
 	.WORD	L9A26	; Draw sprite with shift by 2px
 	.WORD	L9A70	; Draw sprite with no shift
 	.WORD	L9933	; Draw sprite with shift by -2px
 
 ; Routine: Draw sprite with shift by -2px
-; R1 = адрес куда рисовать
-; R2 = адрес спрайта
+; R1 = п╟п╢я─п╣я│ п╨я┐п╢п╟ я─п╦я│п╬п╡п╟я┌я▄
+; R2 = п╟п╢я─п╣я│ я│п©я─п╟п╧я┌п╟
 L9933:	MOV	R1, R3		; 9933	LD L,C
 				; 9934	LD H,B
 	MOV	#24., R0	; 9935	LD A,$18	Sprite height = 24.
@@ -1801,8 +1792,8 @@ L9937:	PUSH	R0		; 9937	EX AF,AF'
 	RETURN			; 997F	RET
 
 ; Routine: Draw sprite with shift by 4px
-; R1 = адрес куда рисовать
-; R2 = адрес спрайта
+; R1 = п╟п╢я─п╣я│ п╨я┐п╢п╟ я─п╦я│п╬п╡п╟я┌я▄
+; R2 = п╟п╢я─п╣я│ я│п©я─п╟п╧я┌п╟
 L99D1:
 	MOV	R1, R3		; 99D1	LD H,B
 				; 99D2	LD L,C
@@ -1870,12 +1861,12 @@ L99D5:	PUSH	R0		; 99D5	EX AF,AF'	store counter A
 	RETURN			; 9A25	RET
 
 ; Routine: Draw sprite with shift by 2px
-; R1 = адрес куда рисовать
-; R2 = адрес спрайта
+; R1 = п╟п╢я─п╣я│ п╨я┐п╢п╟ я─п╦я│п╬п╡п╟я┌я▄
+; R2 = п╟п╢я─п╣я│ я│п©я─п╟п╧я┌п╟
 L9A26:
 	MOV	R1, R3		; 9A26	LD H,B
 				; 9A27	LD L,C
-	MOV	#24., R0	; 9A28	LD A,$18	счётчик цикла = 24.
+	MOV	#24., R0	; 9A28	LD A,$18	я│я┤я▒я┌я┤п╦п╨ я├п╦п╨п╩п╟ = 24.
 L9A2A:	PUSH	R0		; 9A2A	EX AF,AF'
 				; 9A2B	EX DE,HL
 	MOV	(R2)+, R0	; 9A2C	LD A,(HL)
@@ -1931,13 +1922,13 @@ L9A2A:	PUSH	R0		; 9A2A	EX AF,AF'
 	SUB	#34., R3	; 9A66	LD BC,$FFDE
 				; 9A69	ADD HL,BC
 	POP	R0		; 9A6A	EX AF,AF'
-	SOB	R0, L9A2A	; 9A6B	DEC A		повтор цикла
+	SOB	R0, L9A2A	; 9A6B	DEC A		п©п╬п╡я┌п╬я─ я├п╦п╨п╩п╟
 				; 9A6C	JP NZ,$9A2A
 	RETURN			; 9A6F	RET
 
 ; Routine: Draw sprite with no shift
 L9A70:
-	MOV	#8., R3		; 9A72	LD B,$18	счётчик цикла = 24.
+	MOV	#8., R3		; 9A72	LD B,$18	я│я┤я▒я┌я┤п╦п╨ я├п╦п╨п╩п╟ = 24.
 L9A74:	.REPT	3			; loop unroll x3
 	BICB	(R2)+, (R1)+
 	BICB	(R2)+, (R1)+
@@ -1949,11 +1940,11 @@ L9A74:	.REPT	3			; loop unroll x3
 	BISB	(R2)+, (R1)
 	SUB	#34., R1
 	.ENDR
-	SOB	R3, L9A74	; 9A98	DJNZ $9A74	повтор цикла
+	SOB	R3, L9A74	; 9A98	DJNZ $9A74	п©п╬п╡я┌п╬я─ я├п╦п╨п╩п╟
 	RETURN			; 9A9A	RET
 
 ; Routine -- Draw the shadow screen on the real screen, using draw markers LFD00
-L9A9B:	MMODE5				; Включаем режим памяти 5
+L9A9B:	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#L9BFC, R3	; 9A9B	LD HL,$9BFC	Address of table with shadow screen line addresses
 	MOV	(R3), R0	; 9A9E	LD A,(HL)	number of blocks in the line
 L9A9F:	INC	R3		; 9A9F	INC HL		NOTE: byte replaced with word
@@ -1971,61 +1962,61 @@ L9A9F:	INC	R3		; 9A9F	INC HL		NOTE: byte replaced with word
 				; 9AAA	INC HL
 				; 9AAB	LD B,(HL)	BC points to draw markers, end of the line
 				; 9AAC	INC HL
-	MOV	(SP), R5	; 9AAD	EX (SP),HL	теперь HL = адрес в теневом экране
+	MOV	(SP), R5	; 9AAD	EX (SP),HL	я┌п╣п©п╣я─я▄ HL = п╟п╢я─п╣я│ п╡ я┌п╣п╫п╣п╡п╬п╪ я█п╨я─п╟п╫п╣
 	MOV	R3, (SP)
 	MOV	R5, R3
-	MOV	R0, R4		; 9AAE	LD IXh,A	счётчик цикла по строке
+	MOV	R0, R4		; 9AAE	LD IXh,A	я│я┤я▒я┌я┤п╦п╨ я├п╦п╨п╩п╟ п©п╬ я│я┌я─п╬п╨п╣
 L9AB0:	MOVB	(R1), R0	; 9AB0	LD A,(BC)	<
 				; 9AB1	AND A		|  is marker empty?
 	BEQ	L9ACA		; 9AB2	JP Z,$9ACA	|  yes => skip the block
 	DEC	R0		; 9AB5	DEC A		|
 	MOVB	R0, (R1)	; 9AB6	LD (BC),A	|  update marker value
 				; 9AB7	LD IXl,B	|  save B
-				; 9AB9	LD B,$08	|  Цикл по строкам знакоместа, 8. строк
+				; 9AB9	LD B,$08	|  п╕п╦п╨п╩ п©п╬ я│я┌я─п╬п╨п╟п╪ п╥п╫п╟п╨п╬п╪п╣я│я┌п╟, 8. я│я┌я─п╬п╨
 	PUSH	R4
 	MOV	#-64., R4
-	MOV	#-32., R5			;	   для перехода к предыдущей строке теневого экрана
-L9ABB:	.REPT	7			; loop unroll x8; R1 не портится
+	MOV	#-32., R5			;	   п╢п╩я▐ п©п╣я─п╣я┘п╬п╢п╟ п╨ п©я─п╣п╢я▀п╢я┐я┴п╣п╧ я│я┌я─п╬п╨п╣ я┌п╣п╫п╣п╡п╬пЁп╬ я█п╨я─п╟п╫п╟
+L9ABB:	.REPT	7			; loop unroll x8; R1 п╫п╣ п©п╬я─я┌п╦я┌я│я▐
 	CLR	R0		; 9ABB	LD A,(HL)	|  <
-	BISB	(R3), R0			;	|  |  берём байт из теневого экрана
+	BISB	(R3), R0			;	|  |  п╠п╣я─я▒п╪ п╠п╟п╧я┌ п╦п╥ я┌п╣п╫п╣п╡п╬пЁп╬ я█п╨я─п╟п╫п╟
 	ASL	R0
-	MOV	PXCONV(R0), (R2)		;	|  |  конвертируем и выводим на экран
+	MOV	PXCONV(R0), (R2)		;	|  |  п╨п╬п╫п╡п╣я─я┌п╦я─я┐п╣п╪ п╦ п╡я▀п╡п╬п╢п╦п╪ п╫п╟ я█п╨я─п╟п╫
 				; 9ABC	LD (DE),A	|  |
-	ADD	R4, R2		; 9ABD	DEC D		|  |  к предыдущей строке экрана
+	ADD	R4, R2		; 9ABD	DEC D		|  |  п╨ п©я─п╣п╢я▀п╢я┐я┴п╣п╧ я│я┌я─п╬п╨п╣ я█п╨я─п╟п╫п╟
 				; 9ABE	LD A,$E0	|  |
-	ADD	R5, R3		; 9AC0	ADD A,L		|  |  к предыдущей строке теневого экрана
+	ADD	R5, R3		; 9AC0	ADD A,L		|  |  п╨ п©я─п╣п╢я▀п╢я┐я┴п╣п╧ я│я┌я─п╬п╨п╣ я┌п╣п╫п╣п╡п╬пЁп╬ я█п╨я─п╟п╫п╟
 				; 9AC1	LD L,A		|  |
 	.ENDR
 	CLR	R0			; last iteration, w/o ADDs
 	BISB	(R3), R0
 	ASL	R0
 	MOV	PXCONV(R0), (R2)
-				; 9AC2	DJNZ $9ABB	|  продолжение цикла по строкам
+				; 9AC2	DJNZ $9ABB	|  п©я─п╬п╢п╬п╩п╤п╣п╫п╦п╣ я├п╦п╨п╩п╟ п©п╬ я│я┌я─п╬п╨п╟п╪
 				; 9AC4	LD A,D	        |
-	ADD	#<1000-64.>, R2	; 9AC5	ADD A,$08	|  на 8. экранных строк ниже
+	ADD	#<1000-64.>, R2	; 9AC5	ADD A,$08	|  п╫п╟ 8. я█п╨я─п╟п╫п╫я▀я┘ я│я┌я─п╬п╨ п╫п╦п╤п╣
 	ADD	#<256.-32.>, R3	; 9AC7	LD D,A	        |
 				; 9AC8	LD B,IXl	|  restore B
 	POP	R4
 L9ACA:						;	|
 	DEC	R3		; 9ACA	DEC L		|
-	DEC	R2		; 9ACB	DEC E		|  к предыдущей позиции в строке
+	DEC	R2		; 9ACB	DEC E		|  п╨ п©я─п╣п╢я▀п╢я┐я┴п╣п╧ п©п╬п╥п╦я├п╦п╦ п╡ я│я┌я─п╬п╨п╣
 	DEC	R2
-	DEC	R1		; 9ACC	DEC C		|  к предыдущему элементу массива
+	DEC	R1		; 9ACC	DEC C		|  п╨ п©я─п╣п╢я▀п╢я┐я┴п╣п╪я┐ я█п╩п╣п╪п╣п╫я┌я┐ п╪п╟я│я│п╦п╡п╟
 	DEC	R4		; 9ACD	DEC IXh		|
-	BNE	L9AB0		; 9ACF	JP NZ,$9AB0	продолжение цикла по строке
+	BNE	L9AB0		; 9ACF	JP NZ,$9AB0	п©я─п╬п╢п╬п╩п╤п╣п╫п╦п╣ я├п╦п╨п╩п╟ п©п╬ я│я┌я─п╬п╨п╣
 	POP	R3		; 9AD2	POP HL
 	MOVB	(R3), R0	; 9AD3	LD A,(HL)
 				; 9AD4	AND A		end of table?
 	BNE	L9A9F		; 9AD5	JP NZ,$9A9F	no => repeat
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 ;
-	MOVB	L8F0B, R0	; 9AD8	LD A,($8F0B)	адрес в таблице 8D52
-	CMP	R0, #L8D6A	; 9ADB	CP $6A		< 8D6A ? объектов меньше 8
-	BHIS	L9B72		; 9ADD	JP NC,$9B72	нет => переходим
+	MOVB	L8F0B, R0	; 9AD8	LD A,($8F0B)	п╟п╢я─п╣я│ п╡ я┌п╟п╠п╩п╦я├п╣ 8D52
+	CMP	R0, #L8D6A	; 9ADB	CP $6A		< 8D6A ? п╬п╠я┼п╣п╨я┌п╬п╡ п╪п╣п╫я▄я┬п╣ 8
+	BHIS	L9B72		; 9ADD	JP NC,$9B72	п╫п╣я┌ => п©п╣я─п╣я┘п╬п╢п╦п╪
 	MOV	#L8D6A, R1	; 9AE0	LD B,A
 	SUB	R0, R1		; 9AE1	LD A,$6A
 	MOV	R1, R0		; 9AE3	SUB B
-	ADD	R0, R0		; 9AE4	ADD A,A		получили задержку
+	ADD	R0, R0		; 9AE4	ADD A,A		п©п╬п╩я┐я┤п╦п╩п╦ п╥п╟п╢п╣я─п╤п╨я┐
 L9AE5:	;NOP			; 9AE5	LD B,$C8
 ;L9AE7:	SOB	R1, L9AE7	; 9AE7	DJNZ $9AE7
 				; 9AE9	DEC A
@@ -2061,13 +2052,13 @@ L9B22:	BIT	#128., R0	; 9B22	BIT 7,A
 	MOV	#204., R2	; 9B28	LD D,$CC
 	MOV	#12., R3	; 9B2A	LD E,$0C
 ; Sound. This entry point is used by the routine at A694.
-; C R1 = биты, влияющие на задержку между переключением бита звука
-; D R2 = биты, влияющие на длину периода
-; E R3 = общая длительность звука
+; C R1 = п╠п╦я┌я▀, п╡п╩п╦я▐я▌я┴п╦п╣ п╫п╟ п╥п╟п╢п╣я─п╤п╨я┐ п╪п╣п╤п╢я┐ п©п╣я─п╣п╨п╩я▌я┤п╣п╫п╦п╣п╪ п╠п╦я┌п╟ п╥п╡я┐п╨п╟
+; D R2 = п╠п╦я┌я▀, п╡п╩п╦я▐я▌я┴п╦п╣ п╫п╟ п╢п╩п╦п╫я┐ п©п╣я─п╦п╬п╢п╟
+; E R3 = п╬п╠я┴п╟я▐ п╢п╩п╦я┌п╣п╩я▄п╫п╬я│я┌я▄ п╥п╡я┐п╨п╟
 L9B2C:	;MOV	#2, R5		; 9B2C	LD B,$02
 ;	MOV	#2, R4		; 9B2E	LD L,$02
 ;L9B30:	PUSH	R1		; 9B30	XOR A		Border 0
-;	MOV	#220, R0		; значение для порта 177716
+;	MOV	#220, R0		; п╥п╫п╟я┤п╣п╫п╦п╣ п╢п╩я▐ п©п╬я─я┌п╟ 177716
 ;L9B31:	MOV	#100, R1
 ;	PUSH	R5		; 9B33	PUSH BC
 ;	XOR	R1, R0		; 9B31	XOR $18
@@ -2085,7 +2076,7 @@ L9B2C:	;MOV	#2, R5		; 9B2C	LD B,$02
 ;	BICB	R3, R4		; 9B42	AND C
 ;	INCB	R4		; 9B43	INC A
 ;				; 9B44	LD L,A
-;	SWAB	R3			; теперь используем второй байт
+;	SWAB	R3			; я┌п╣п©п╣я─я▄ п╦я│п©п╬п╩я▄п╥я┐п╣п╪ п╡я┌п╬я─п╬п╧ п╠п╟п╧я┌
 ;	MOV	R2, R5
 ;	BICB	R3, R5
 ;	INCB	R5		; 9B47	INC A
@@ -2102,24 +2093,24 @@ L9B4F:	BIT	#16., R0	; 9B4F	BIT 4,A
 	MOV	#50., R4	; 9B59	LD H,$32
 ;
 ; Sound. This entry point is used by the routine at A694.
-; D R1 = задержка между изменением бита; L R3 = длительность периода
-; H R4 = на сколько уменьшать D за период; E R2 = количество периодов
+; D R1 = п╥п╟п╢п╣я─п╤п╨п╟ п╪п╣п╤п╢я┐ п╦п╥п╪п╣п╫п╣п╫п╦п╣п╪ п╠п╦я┌п╟; L R3 = п╢п╩п╦я┌п╣п╩я▄п╫п╬я│я┌я▄ п©п╣я─п╦п╬п╢п╟
+; H R4 = п╫п╟ я│п╨п╬п╩я▄п╨п╬ я┐п╪п╣п╫я▄я┬п╟я┌я▄ D п╥п╟ п©п╣я─п╦п╬п╢; E R2 = п╨п╬п╩п╦я┤п╣я│я┌п╡п╬ п©п╣я─п╦п╬п╢п╬п╡
 L9B5B:
-;	MOV	#220, R0		; значение для порта 177716
-;10$:	PUSH	R3			; счётчик длины периода
+;	MOV	#220, R0		; п╥п╫п╟я┤п╣п╫п╦п╣ п╢п╩я▐ п©п╬я─я┌п╟ 177716
+;10$:	PUSH	R3			; я│я┤я▒я┌я┤п╦п╨ п╢п╩п╦п╫я▀ п©п╣я─п╦п╬п╢п╟
 ;20$:	PUSH	R1
 ;30$:	NOP
 ;	SOB	R1, 30$
 ;	;MOV	R0, @#177716
 ;	MOV	#100, R1
 ;	XOR	R1, R0
-;	POP	R1			; восстанавливаем значение задержки
+;	POP	R1			; п╡п╬я│я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣п╪ п╥п╫п╟я┤п╣п╫п╦п╣ п╥п╟п╢п╣я─п╤п╨п╦
 ;	SOB	R3, 20$
-;	POP	R3			; восстанавливаем длину периода
+;	POP	R3			; п╡п╬я│я│я┌п╟п╫п╟п╡п╩п╦п╡п╟п╣п╪ п╢п╩п╦п╫я┐ п©п╣я─п╦п╬п╢п╟
 ;	SUB	R4, R1
-;	BIC	#177400, R1		; оставляем младший байт
+;	BIC	#177400, R1		; п╬я│я┌п╟п╡п╩я▐п╣п╪ п╪п╩п╟п╢я┬п╦п╧ п╠п╟п╧я┌
 ;	SOB	R2, 10$
-;	;MOV	#320, @#177716		; выключаем звук
+;	;MOV	#320, @#177716		; п╡я▀п╨п╩я▌я┤п╟п╣п╪ п╥п╡я┐п╨
 L9B6D:	CLRB	L8F15		; 9B6D	XOR A
 				; 9B6E	LD ($8F15),A
 	RETURN
@@ -2196,7 +2187,7 @@ L9BB3:	MOV	L8F01, R3	; 9BB3	LD HL,($8F01)	object table address
 				; 9BCF	LD A,L
 				; 9BD0	CP $F0
 	BHIS	L9BE2		; 9BD2	JP NC,$9BE2	greater => movement
-; Останов Lasertron
+; п·я│я┌п╟п╫п╬п╡ Lasertron
 L9BD5:	CLR	R0		; 9BD5	XOR A
 	MOVB	R0, <L8A50+8.>	; 9BD6	LD ($8A58),A	set Lasertron movement = stop
 	BR	L9BD9
@@ -2206,7 +2197,7 @@ L9BE2:	MOVB	L8F16, R0	; 9BE2	LD A,($8F16)	get the counter
 	BIC	#177770, R0	; 9BE6	AND $07		0..7
 	MOVB	R0, L8F16	; 9BE8	LD ($8F16),A	save the counter
 				; 9BEB	AND A
-	BEQ	L9BD9		; 9BEC	JR Z,$9BD9	обнулился? => стираем индикацию движения
+	BEQ	L9BD9		; 9BEC	JR Z,$9BD9	п╬п╠п╫я┐п╩п╦п╩я│я▐? => я│я┌п╦я─п╟п╣п╪ п╦п╫п╢п╦п╨п╟я├п╦я▌ п╢п╡п╦п╤п╣п╫п╦я▐
 	CMPB	R0, #4		; 9BEE	CP $04
 	BEQ	L9BF3		; 9BF0	JP NZ,$9AEF
 	JMP	L9AEF
@@ -2222,7 +2213,7 @@ L9BD9:	SXT	R0
 	MOV	#<SCRIND+<8.*64.>+32.>, R2	; Address on the screen
 	MOV	#<L6020+420>, R3
 	MOV	#8., R1
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 1$:	CLR	R5			; #1
 	BISB	(R3)+, R5		; get byte
 	ASL	R5
@@ -2240,7 +2231,7 @@ L9BD9:	SXT	R0
 	ADD	#<64.-2>, R2		; next line
 	ADD	#<32.-1>, R3
 	SOB	R1, 1$
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	JMP	L9AEF		; 9BDF	JP $9AEF
 
 ; Data block: 18 records used to draw the shadow screen
@@ -2352,13 +2343,13 @@ L9D0B:	BISB	#100, (R3)	; 9D0B	SET 6,(HL)
 	MOV	#24., R1 	; 9D1A	LD B,$03
 				; 9D1C	LD DE,$001F
 				; 9D1F	XOR A
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 L9D20:	CLR	(R0)+		; 9D20	LD (HL),A
 				; 9D21	INC L
 	CLR	(R0)		; 9D22	LD (HL),A
 	ADD	#<64.-2>, R0	; 9D23	ADD HL,DE
 	SOB	R1, L9D20	; 9D24	DJNZ $9D20
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	JMP	L9E1A		; 9D26	JP $9E1A	next record by IX
 ; Process movement; A = (IX+$08), A != 0
 L9D29:	DEC	R0		; 9D29	DEC A
@@ -2478,7 +2469,7 @@ L9DC8:	CALL	LA270		; 9DC8	CALL $A270	get next random number
 	BIC	#177400, R0	;			now A is a random byte
 	MOV	#L8FF0, R3	; 9DD3	LD HL,$8FF0
 	ADD	R2, R3		; 9DD6	ADD HL,DE
-	MOVB	(R3), R5	; 9DD7	AND (HL)	TODO: Здесь надо проверить/уточнить операцию
+	MOVB	(R3), R5	; 9DD7	AND (HL)	TODO: п≈п╢п╣я│я▄ п╫п╟п╢п╬ п©я─п╬п╡п╣я─п╦я┌я▄/я┐я┌п╬я┤п╫п╦я┌я▄ п╬п©п╣я─п╟я├п╦я▌
 	COMB	R5
 	BICB	R5, R0
 	INC	R3		; 9DD8	INC HL
@@ -2845,20 +2836,20 @@ LA03B:
 	BISB	#1, R1		; A059	SET 0,B		fire
 LA05B:				; A05B	LD A,$F7
 				; A05D	IN A,($FE)	keyboard #F7FE 1 - 5
-	CMP	R0, #032 ; Up	; A05F	RRA
+	CMP	R0, #101 ; Up	; A05F	RRA
 	BNE	LA064		; A060	JR C,$A064	not "Up" -> jump
 	BISB	#2, R1		; A062	SET 1,B		"Up"
 LA064:				; A064	LD A,$FB
 				; A066	IN A,($FE)	keyboard #FBFE Q - T
-	CMP	R0, #033 ; Dn	; A068	RRA
+	CMP	R0, #102 ; Dn	; A068	RRA
 	BNE	LA06D		; A069	JR C,$A06D	not "Dn" -> jump
 	BISB	#4, R1		; A06B	SET 2,B		"Dn"
 LA06D:				; A06D	LD A,$DF
 				; A06F	IN A,($FE)	keyboard #DFFE Y - P
-	CMP	R0, #031 ; Rt	; A071	RRA
+	CMP	R0, #103 ; Rt	; A071	RRA
 	BNE	LA076		; A072	JR C,$A076	not "Rt" -> jump
 	BISB	#10, R1		; A074	SET 3,B		"Rt", right
-LA076:	CMP	R0, #010 ; Lt	; A076	RRA
+LA076:	CMP	R0, #104 ; Lt	; A076	RRA
 	BNE	LA07B		; A077	JR C,$A07B	not "<=" -> jump
 	BISB	#20, R1		; A079	SET 4,B		"Lt", left
 LA07B:				; A07B	LD A,B
@@ -2878,7 +2869,7 @@ LA10B:	MOV	R0, <LA119+2>	; A10B	EX AF,AF'	save AF
 	ASL	R2
 	ADD	#<SCRIND+<9.*64.>+38.>, R2	; Address on the screen
 	MOV	#7., R1
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 2$:	CLR	R0
 	BISB	(R3), R0		; get byte
 	ASL	R0
@@ -2887,7 +2878,7 @@ LA10B:	MOV	R0, <LA119+2>	; A10B	EX AF,AF'	save AF
 	ADD	#64., R2		; next line
 	ADD	#32., R3
 	SOB	R1, 2$
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	POP	R3
 	POP	R2
 LA119:	MOV	#12345, R0	; A119	EX AF,AF'	restore AF
@@ -3041,11 +3032,11 @@ LA1CE:	MOVB	#22., (R2)	; A1CE	LD (HL),$16	set sprite = fireball
 	ASL	R0
 	ADD	#<SCRIND+<9.*64.>+38.>, R0	; Address on the screen
 	MOV	#7., R1
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 2$:	CLR	(R0)
 	ADD	#64., R0		; next line
 	SOB	R1, 2$		; A1EF	DEC A
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	DECB	L8F18		; A1F0	LD ($8F18),A
 				; A1F3	LD HL,$8F15
 	BISB	#2, L8F15	; A1F6	SET 1,(HL)
@@ -3134,8 +3125,8 @@ LA26E:	MOVB	R0, (R3)	; A26E	LD (HL),A	set Ufo sprite phase
 	RETURN			; A26F	RET
 
 ; Routine: Get pseudo-random number, result in HL
-; Портит: R0, R2, R3
-; Результат в R3
+; п÷п╬я─я┌п╦я┌: R0, R2, R3
+; п═п╣п╥я┐п╩я▄я┌п╟я┌ п╡ R3
 LA270:
 	MOV	L5C76, R2	; A270	LD DE,($5C76)	; Read RND SEED variable
 	MOV	R2, R3		; A274	LD H,E
@@ -3221,14 +3212,14 @@ LA2EB:	MOVB	#1, (R3)	; A2EB	LD (HL),$01	<  set movement flags = move
 	CALL	LA34D		; A2F3	CALL $A34D	do the action
 ; Auto-Vortons moving into one line
 	MOV	#<L8A10+7>, R3	; A2F6	LD HL,$8A17	Auto-Vorton direction
-	MOVB	#7, (R3)	; A2F9	LD (HL),$07	по диагонали
+	MOVB	#7, (R3)	; A2F9	LD (HL),$07	п©п╬ п╢п╦п╟пЁп╬п╫п╟п╩п╦
 	MOV	#16., R2	; A2FB	LD DE,$0010
 	ADD	R2, R3		; A2FE	ADD HL,DE
-	MOVB	#1, (R3)	; A2FF	LD (HL),$01	по диагонали
+	MOVB	#1, (R3)	; A2FF	LD (HL),$01	п©п╬ п╢п╦п╟пЁп╬п╫п╟п╩п╦
 	ADD	R2, R3		; A301	ADD HL,DE
-	MOVB	#7, (R3)	; A302	LD (HL),$07	по диагонали
+	MOVB	#7, (R3)	; A302	LD (HL),$07	п©п╬ п╢п╦п╟пЁп╬п╫п╟п╩п╦
 	ADD	R2, R3		; A304	ADD HL,DE
-	MOVB	#1, (R3)	; A305	LD (HL),$01	по диагонали
+	MOVB	#1, (R3)	; A305	LD (HL),$01	п©п╬ п╢п╦п╟пЁп╬п╫п╟п╩п╦
 	CLR	R0		; A307	XOR A		action = none
 	MOV	#12., R1	; A308	LD B,$0C	loop counter
 	CALL	LA34D		; A30A	CALL $A34D	do the action
@@ -3330,7 +3321,7 @@ LA37A:	PUSH	R1		; A37A	PUSH BC	        <
 ; End of the DEMO MODE
 LA3A8:
 ; Paint the game screen with red
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#SCREEN, R2		; Screen address
 	MOV	#144., R0		; Number of lines to fill
 1$:	MOV	#32., R1		; Counter to loop thru the line
@@ -3338,7 +3329,7 @@ LA3A8:
 2$:	MOV	R3, (R2)+		; Write into the screen
 	SOB	R1, 2$
 	SOB	R0, 1$			; continue loop by lines
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 ; Show the sign
 	MOV	#LA4D6, R3	; A3B7	LD HL,$A4D6	"THERE IS ONLY ONE WAY TO ENCOUNTER..."
 	CALL	LB890		; A3BA	CALL $B890	Print Text
@@ -3350,11 +3341,11 @@ LA3A8:
 
 ; Prepare screen and indicators
 LA3D3:
-	CALL	CLRSCR		; Очистка экрана
-;TODO: Установить основную палитру
+	CALL	CLRSCR		; п·я┤п╦я│я┌п╨п╟ я█п╨я─п╟п╫п╟
+;TODO: пёя│я┌п╟п╫п╬п╡п╦я┌я▄ п╬я│п╫п╬п╡п╫я┐я▌ п©п╟п╩п╦я┌я─я┐
 
-; Показываем панель индикаторов
-	MMODE5				; Включаем режим памяти 5
+; п÷п╬п╨п╟п╥я▀п╡п╟п╣п╪ п©п╟п╫п╣п╩я▄ п╦п╫п╢п╦п╨п╟я┌п╬я─п╬п╡
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#L6020, R3	; A3E0	LD HL,$6020
 	MOV	#SCRIND, R2	; A3E3	LD DE,$5060
 	MOV	#34., R0	; A3E6	LD A,$22
@@ -3365,7 +3356,7 @@ LA3E9:	MOV	#32., R1	; A3E9	LD BC,$0020
 1$:	CLR	R5		; A3EE	LDIR
 	BISB	(R3)+, R5
 	ASL	R5
-	MOV	PXCONV(R5), (R2)+		; Конвертируем пикселы по таблице
+	MOV	PXCONV(R5), (R2)+		; п п╬п╫п╡п╣я─я┌п╦я─я┐п╣п╪ п©п╦п╨я│п╣п╩я▀ п©п╬ я┌п╟п╠п╩п╦я├п╣
 	SOB	R1, 1$
 				; A3F0	POP DE
 	DEC	R0		; A3F1	DEC A
@@ -3381,7 +3372,7 @@ LA3E9:	MOV	#32., R1	; A3E9	LD BC,$0020
 				; A400	LD E,A
 				; A401	JR $A3E9
 LA403:
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 				; A403	LD DE,$5A60	Screen attribute area address
 				; A406	LD BC,$00A0
 				; A409	LDIR	        Fill attributes
@@ -3407,12 +3398,12 @@ LA428:	MOVB	R0, (R3)	; A428	LD (HL),A
 ; Routine entry point: Show score
 LA42B:	MOV	#<SCRIND+<10.*64.>+58.>, R2	; A42B	LD DE,$529D	address on the screen
 	MOV	#<LA480+6>, R1	; A42E	LD BC,$A486	Score
-LA431:	MMODE5				; Включаем режим памяти 5
+LA431:	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 LA432:	MOVB	(R1), R0	; A431	LD A,(BC)
 	BIC	#177400, R0
 	CMPB	R0, #377	; A432	CP $FF
 	BNE	1$		; A434	RET Z
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	RETURN
 1$:	PUSH	R1		; A435	PUSH BC
 	MOV	R0, R1		; A436	LD C,A
@@ -3428,7 +3419,7 @@ LA432:	MOVB	(R1), R0	; A431	LD A,(BC)
 LA444:	CLR	R0		; A444	LD A,(HL)
 	BISB	(R3)+, R0
 	ASL	R0
-	MOV	PXCONV(R0), (R2)	; Конвертируем пикселы по таблице и записываем в экран
+	MOV	PXCONV(R0), (R2)	; п п╬п╫п╡п╣я─я┌п╦я─я┐п╣п╪ п©п╦п╨я│п╣п╩я▀ п©п╬ я┌п╟п╠п╩п╦я├п╣ п╦ п╥п╟п©п╦я│я▀п╡п╟п╣п╪ п╡ я█п╨я─п╟п╫
 				; A445	LD (DE),A
 	ADD	#64., R2	; A446	INC D		next line
 				; A447	INC HL
@@ -3549,15 +3540,15 @@ LA54F:	MOVB	(R4), R0	; A54F	LD A,(IX+$00)
 	ADD	R1, R2		; A589	ADD HL,BC
 	MOV	R2, R1		; A58A	LD C,L
 				; A58B	LD B,H		BC = address where to draw the sprite
-	CMP	R1, #LFF29 ;DEBUG вышли за границу экрана?
-	BLO	1$	   ;DEBUG нет => переходим
+	CMP	R1, #LFF29 ;DEBUG п╡я▀я┬п╩п╦ п╥п╟ пЁя─п╟п╫п╦я├я┐ я█п╨я─п╟п╫п╟?
+	BLO	1$	   ;DEBUG п╫п╣я┌ => п©п╣я─п╣я┘п╬п╢п╦п╪
 	HALT
 1$:	PUSH	R2		; A58C	PUSH HL
 				; A58D	EX DE,HL
 	MOV	#LBBC0, R2	; A58E	LD DE,$BBC0	Sprite #5 flat blocker
 	CALL	(R3)		; A591	JP (HL)
 ;
-;NOTE: Code block A592-A5AС replaced to table L9915
+;NOTE: Code block A592-A5Aп║ replaced to table L9915
 ;
 LA5AD:	POP	R3		; A5AD	POP HL
 				; A5AE	LD A,H
@@ -3577,11 +3568,11 @@ LA5AD:	POP	R3		; A5AD	POP HL
 	BIC	#177740, R0	; A5C0	AND $1F		offset within a single line -- 0..31.
 				; A5C2	LD E,A
 	BIS	R0, R3		; A5C3	LD D,$FD
-	ADD	#LFD00, R3	; A5C5	ADD HL,DE	адрес начала области флагов отрисовки
+	ADD	#LFD00, R3	; A5C5	ADD HL,DE	п╟п╢я─п╣я│ п╫п╟я┤п╟п╩п╟ п╬п╠п╩п╟я│я┌п╦ я└п╩п╟пЁп╬п╡ п╬я┌я─п╦я│п╬п╡п╨п╦
 				; A5C6	LD DE,$FFDE	-34.
 	MOV	#1, R0		; A5C9	LD A,$01	draw marker
-	MOV	#4, R1		; A5CB	LD B,$04	спрайт занимает 3 или 4 знако-строки
-LA5CD:	MOVB	R0, (R3)+	; A5CD	LD (HL),A	<  отмечаем к отрисовке 3 знакоместа
+	MOV	#4, R1		; A5CB	LD B,$04	я│п©я─п╟п╧я┌ п╥п╟п╫п╦п╪п╟п╣я┌ 3 п╦п╩п╦ 4 п╥п╫п╟п╨п╬-я│я┌я─п╬п╨п╦
+LA5CD:	MOVB	R0, (R3)+	; A5CD	LD (HL),A	<  п╬я┌п╪п╣я┤п╟п╣п╪ п╨ п╬я┌я─п╦я│п╬п╡п╨п╣ 3 п╥п╫п╟п╨п╬п╪п╣я│я┌п╟
 				; A5CE	INC HL		|
 	MOVB	R0, (R3)+	; A5CF	LD (HL),A	|
 				; A5D0	INC HL		|
@@ -3853,14 +3844,14 @@ LAA90:	.WORD	<LD900+31>,	12.	; $19,$D9,$0C
 	.WORD	<LD900+4420>, 	17.	; $10,$E2,$11
 	.WORD	<LD900+5021>, 	8.	; $11,$E3,$08
 
-PALET:	.WORD	^B00000111000000000	; Текущее значение палитры
+PALET:	.WORD	^B00000111000000000	; п╒п╣п╨я┐я┴п╣п╣ п╥п╫п╟я┤п╣п╫п╦п╣ п©п╟п╩п╦я┌я─я▀
 
 ; Start point
 LB0DE:
 		; B0DE	LD BC,$F300
 LB0E1:
-	CALL	CLRSCR		; Очистить экран
-; Звук перед показом экрана меню
+	CALL	CLRSCR		; п·я┤п╦я│я┌п╦я┌я▄ я█п╨я─п╟п╫
+; п≈п╡я┐п╨ п©п╣я─п╣п╢ п©п╬п╨п╟п╥п╬п╪ я█п╨я─п╟п╫п╟ п╪п╣п╫я▌
 	MOV	#170., R4	; B0E1	LD HL,$785A
 	MOV	#90., R3
 	CALL	LB203		; B0E4	CALL $B203	Sound
@@ -3908,7 +3899,7 @@ LB13C:
 	MOV	#170., R4	; B1B6	LD HL,$785A
 	MOV	#90., R3
 	CALL	LB203		; B1B9	CALL $B203	Sound
-	CALL	CLRSCR		; Очистить экран
+	CALL	CLRSCR		; п·я┤п╦я│я┌п╦я┌я▄ я█п╨я─п╟п╫
 	JMP	LB4D0		; B1BC	JP $B4D0	Show Info Screen
 6$:	CMP	R0, #066	; '6' ?
 	BNE	7$
@@ -3937,14 +3928,14 @@ LB13C:
 	BR	LB13C		; B200	JP $B13C
 
 ; Routine: Sound
-; H R4 = общая длительность звука; L R3 = тон??
+; H R4 = п╬п╠я┴п╟я▐ п╢п╩п╦я┌п╣п╩я▄п╫п╬я│я┌я▄ п╥п╡я┐п╨п╟; L R3 = я┌п╬п╫??
 LB203:
-	MOV	#220, R0		; значение для порта 177716
+	MOV	#220, R0		; п╥п╫п╟я┤п╣п╫п╦п╣ п╢п╩я▐ п©п╬я─я┌п╟ 177716
 				; B203	LD C,H
 	MOV	R3, R2		; B206	LD D,L
 	MOV	R3, R5		; B207	LD E,D
 	DECB	R5		; B208	DEC E
-LB208:	MOV	#96., R1		; теперь это B
+LB208:	MOV	#96., R1		; я┌п╣п©п╣я─я▄ я█я┌п╬ B
 LB209:	PUSH	R1
 	;MOV	R0, @#177716	; B209	OUT ($FE),A	Set/reset EAR and MIC bits
 	INCB	R2		; B20B	INC D
@@ -3962,7 +3953,7 @@ LB218:	POP	R1
 	SOB	R1, LB209	; B218	DJNZ $B209	repeat
 				; B21A	DEC C
 	SOB	R4, LB208	; B21B	JR NZ,$B209	repeat
-	;MOV	#320, @#177716		; выключаем звук
+	;MOV	#320, @#177716		; п╡я▀п╨п╩я▌я┤п╟п╣п╪ п╥п╡я┐п╨
 	RETURN
 
 ; Text for Title Screen
@@ -4084,7 +4075,7 @@ LB33C:	MOV	#LB499, R3	; B33C	LD HL,$B499	"HIGHWAY ENCOUNTER" pixels address
 LB39A:	;STUB
 ; Copy shadow screen to the real screen, 256. x 155. pixels
 LB3A9:
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 	MOV	#<SCREEN+2000>, R2	; Address on the real screen = game screen start + 18. lines
 
 	MOV	#<LDBC0+576.>, R3	; Copy from
@@ -4098,7 +4089,7 @@ LB3A9:
 	.ENDR
 	SOB	R1, 2$
 	SOB	R4, 1$			; continue loop by lines
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	RETURN
 
 ; Routine for Title Screen
@@ -4205,7 +4196,7 @@ LB472:	MOV	LB4CB, R3	; B472	LD HL,($B4CB)	restore HL
 	POP	R1		; B496	POP BC
 	POP	R3		; B497	POP HL
 	RETURN			; B498	RET
-; Таблица из 4-х элементов для выбора процедуры отрисовки спрайта
+; п╒п╟п╠п╩п╦я├п╟ п╦п╥ 4-я┘ я█п╩п╣п╪п╣п╫я┌п╬п╡ п╢п╩я▐ п╡я▀п╠п╬я─п╟ п©я─п╬я├п╣п╢я┐я─я▀ п╬я┌я─п╦я│п╬п╡п╨п╦ я│п©я─п╟п╧я┌п╟
 LB446:	.WORD	L9933	; 0. -- JP 9933 Draw sprite with shift by -2px
 	.WORD	L9A70	; 8. -- JP 9A70 Draw sprite with no shift
 	.WORD	L9A26	; 16. -- JP 9A26 Draw sprite with shift by 2px
@@ -4259,7 +4250,7 @@ LB4D0:	MOVB	#6, LB4CF		; B4D0	LD A,$06
 ; NOTE: I removed the second pass used to fill attributes
 LB52D:	MOV	#LB62C, R3	; B52D	LD HL,$B62C	Info Screen Small Font Signs
 				; B530	PUSH HL
-LB531:	MMODE5				; Включаем режим памяти 5
+LB531:	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 LB532:	MOV	(R3)+, R2	; B531	LD D,(HL)	Screen address
 				; B532	INC HL
 				; B533	LD E,(HL)
@@ -4334,7 +4325,7 @@ LB5B4:	POP	R2		; B5B4	POP DE		restore screen address
 	INC	R2
 	BR	LB539		; B5B8	JP $B539
 LB5BB:				; B5BB	POP HL
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	RETURN
 LB627:	.BLKB	5
 	.EVEN
@@ -4388,7 +4379,7 @@ LB62C:	.WORD	SCREEN+<40.*64.>+16.
 ;NOTE: I removed the first pass needed to fill in screen attributes
 ;NOTE: I added even address alignment after byte 377
 LB890:
-	MMODE5				; Включаем режим памяти 5
+	MMODE5				; п▓п╨п╩я▌я┤п╟п╣п╪ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦ 5
 LB8BB:	MOV	(R3)+, R2	; B8BB	LD D,(HL)
 				; B8BC	INC HL
 				; B8BD	LD E,(HL)
@@ -4399,7 +4390,7 @@ LB8C0:	MOVB	(R3)+, R0	; B8C0	LD A,(HL)
 	CMP	R0, #254.	; B8C2	CP $FE
 	BLO	LB8C9		; B8C4	JR C,$B8C9
 	BNE	1$
-	MMODE1				; Включаем основной режим памяти
+	MMODE1				; п▓п╨п╩я▌я┤п╟п╣п╪ п╬я│п╫п╬п╡п╫п╬п╧ я─п╣п╤п╦п╪ п©п╟п╪я▐я┌п╦
 	RETURN                  ; B8C6	RET Z
 1$:	BIT	#1, R3
 	BEQ	LB8BB
@@ -4427,7 +4418,7 @@ LB8C9:	BIC	#177700, R0	; B8C9	AND $3F
 LB8E2:	CLR	R0
 	BISB	(R3)+, R0	; B8E2	LD A,(HL)
 	ASL	R0
-	MOV	PXCONV(R0), R0		; Конвертируем пикселы по таблице
+	MOV	PXCONV(R0), R0		; п п╬п╫п╡п╣я─я┌п╦я─я┐п╣п╪ п©п╦п╨я│п╣п╩я▀ п©п╬ я┌п╟п╠п╩п╦я├п╣
 	ASL	R0
 	MOV	R0, (R2)	; B8E3	LD (DE),A	write to the screen
 	ADD	#64., R2	; B8E4	INC D		next line
@@ -4449,35 +4440,35 @@ LD900:
 ; Shadow screen, 24. char-lines, 24. * 8. lines, 32. * 24. * 8. = 6144. bytes
 LDBC0 = LD900 + 704.
 LDF00 = LDBC0 + 832.
-LE900 = LDF00 + 2560.			; Условное начало второго теневого экрана
+LE900 = LDF00 + 2560.			; пёя│п╩п╬п╡п╫п╬п╣ п╫п╟я┤п╟п╩п╬ п╡я┌п╬я─п╬пЁп╬ я┌п╣п╫п╣п╡п╬пЁп╬ я█п╨я─п╟п╫п╟
 LEB00 = LE900 + 512.
 LFD00 = LEB00 + 4608.			; Drawing markers area
 
 ;------------------------------------------------------------------------------
-; Область на месте теневого экрана, этот код может использоваться только в самом начале
+; п·п╠п╩п╟я│я┌я▄ п╫п╟ п╪п╣я│я┌п╣ я┌п╣п╫п╣п╡п╬пЁп╬ я█п╨я─п╟п╫п╟, я█я┌п╬я┌ п╨п╬п╢ п╪п╬п╤п╣я┌ п╦я│п©п╬п╩я▄п╥п╬п╡п╟я┌я▄я│я▐ я┌п╬п╩я▄п╨п╬ п╡ я│п╟п╪п╬п╪ п╫п╟я┤п╟п╩п╣
 
-; Выполнить все подготовительные операции перед запуском основной программы
+; п▓я▀п©п╬п╩п╫п╦я┌я▄ п╡я│п╣ п©п╬п╢пЁп╬я┌п╬п╡п╦я┌п╣п╩я▄п╫я▀п╣ п╬п©п╣я─п╟я├п╦п╦ п©п╣я─п╣п╢ п╥п╟п©я┐я│п╨п╬п╪ п╬я│п╫п╬п╡п╫п╬п╧ п©я─п╬пЁя─п╟п╪п╪я▀
 PREPAR:
-; Создать таблицу PXCONV по адерсам 001000-002000, для конвертации пикселей
+; п║п╬п╥п╢п╟я┌я▄ я┌п╟п╠п╩п╦я├я┐ PXCONV п©п╬ п╟п╢п╣я─я│п╟п╪ 001000-002000, п╢п╩я▐ п╨п╬п╫п╡п╣я─я┌п╟я├п╦п╦ п©п╦п╨я│п╣п╩п╣п╧
 	MOV	#002000, R2
-	MOV	#255., R3		; R3 бежит от 255. до 0
-1$:	CLR	R5			; в R5 будет готовое слово
-	MOV	#8., R4			; в R4 счётчик по разрядам
+	MOV	#255., R3		; R3 п╠п╣п╤п╦я┌ п╬я┌ 255. п╢п╬ 0
+1$:	CLR	R5			; п╡ R5 п╠я┐п╢п╣я┌ пЁп╬я┌п╬п╡п╬п╣ я│п╩п╬п╡п╬
+	MOV	#8., R4			; п╡ R4 я│я┤я▒я┌я┤п╦п╨ п©п╬ я─п╟п╥я─я▐п╢п╟п╪
 	MOV	R3, R1
-2$:	ASR	R1			; 0-й бит идёт в C
-	ROR	R5			; забираем из C
+2$:	ASR	R1			; 0-п╧ п╠п╦я┌ п╦п╢я▒я┌ п╡ C
+	ROR	R5			; п╥п╟п╠п╦я─п╟п╣п╪ п╦п╥ C
 	ROR	R5
 	SOB	R4, 2$
-	MOV	R5, -(R2)		; записываем результат
+	MOV	R5, -(R2)		; п╥п╟п©п╦я│я▀п╡п╟п╣п╪ я─п╣п╥я┐п╩я▄я┌п╟я┌
 	SOB	R3, 1$
-	CLR	-(R2)			; 0-й элемент
+	CLR	-(R2)			; 0-п╧ я█п╩п╣п╪п╣п╫я┌
 ;
-; Завершили все подготовительные операции
+; п≈п╟п╡п╣я─я┬п╦п╩п╦ п╡я│п╣ п©п╬п╢пЁп╬я┌п╬п╡п╦я┌п╣п╩я▄п╫я▀п╣ п╬п©п╣я─п╟я├п╦п╦
 	RETURN
 
 ;------------------------------------------------------------------------------
 
-; Небольшая область после теневых экранов и drawing markers
+; п²п╣п╠п╬п╩я▄я┬п╟я▐ п╬п╠п╩п╟я│я┌я▄ п©п╬я│п╩п╣ я┌п╣п╫п╣п╡я▀я┘ я█п╨я─п╟п╫п╬п╡ п╦ drawing markers
 	.=<LFD00+553.>
 LFF29:	.BYTE	0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0
 	.BYTE	0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0
@@ -4485,7 +4476,7 @@ LFF29:	.BYTE	0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0
 
 ;------------------------------------------------------------------------------
 
-; Надпись мелким шрифтом под главным меню
+; п²п╟п╢п©п╦я│я▄ п╪п╣п╩п╨п╦п╪ я┬я─п╦я└я┌п╬п╪ п©п╬п╢ пЁп╩п╟п╡п╫я▀п╪ п╪п╣п╫я▌
 PORTBY:
 	.WORD	SCREEN + <192.*64.> + 2.
 	.ASCII	/PORT@TO@PK11:16@BY@NZEEMIN@/
@@ -4541,29 +4532,29 @@ LB839:	.WORD	SCREEN+<178.*64.>+6.
 	.BYTE	147,130,125,136,115,142,125,121,124,151,212,376			; WHEN READY
 	.EVEN
 
-; Подпрограмма: Ожидание символа с клавиатуры: R0 = полученный символ
+; п÷п╬п╢п©я─п╬пЁя─п╟п╪п╪п╟: п·п╤п╦п╢п╟п╫п╦п╣ я│п╦п╪п╡п╬п╩п╟ я│ п╨п╩п╟п╡п╦п╟я┌я┐я─я▀: R0 = п©п╬п╩я┐я┤п╣п╫п╫я▀п╧ я│п╦п╪п╡п╬п╩
 WTKEY:	TSTB	@#177560
 	BPL	WTKEY
 	CLR	R0
-	MOVB	@#177562, R0	; символ в R0
+	MOVB	@#177562, R0	; я│п╦п╪п╡п╬п╩ п╡ R0
 	CMPB	R0, #33
 	BNE	RETN
 ESCKEY:	TSTB	@#177560
 	BPL	ESCKEY
-	MOVB	@#177562, R0	; символ в R0
-	BIS	#15400,R0	; #33 в верхний байт
+	MOVB	@#177562, R0	; я│п╦п╪п╡п╬п╩ п╡ R0
+	BIS	#15400,R0	; #33 п╡ п╡п╣я─я┘п╫п╦п╧ п╠п╟п╧я┌
 	RETURN
-; Подпрограмма: Получение символа с клавиатуры: флаг Z=0 = есть символ, R0 = полученный символ
-GETKEY:	TSTB	@#177560	; есть символ?
-	BPL	10$		; нет символа => выходим
-	MOVB	@#177562, R0	; символ в R0
+; п÷п╬п╢п©я─п╬пЁя─п╟п╪п╪п╟: п÷п╬п╩я┐я┤п╣п╫п╦п╣ я│п╦п╪п╡п╬п╩п╟ я│ п╨п╩п╟п╡п╦п╟я┌я┐я─я▀: я└п╩п╟пЁ Z=0 = п╣я│я┌я▄ я│п╦п╪п╡п╬п╩, R0 = п©п╬п╩я┐я┤п╣п╫п╫я▀п╧ я│п╦п╪п╡п╬п╩
+GETKEY:	TSTB	@#177560	; п╣я│я┌я▄ я│п╦п╪п╡п╬п╩?
+	BPL	10$		; п╫п╣я┌ я│п╦п╪п╡п╬п╩п╟ => п╡я▀я┘п╬п╢п╦п╪
+	MOVB	@#177562, R0	; я│п╦п╪п╡п╬п╩ п╡ R0
 	CMPB	R0, #33		; Esc ?
 	BEQ	ESCKEY
 	RETURN
-10$:	CLR	R0		; возвращаем пустой код клавиши
+10$:	CLR	R0		; п╡п╬п╥п╡я─п╟я┴п╟п╣п╪ п©я┐я│я┌п╬п╧ п╨п╬п╢ п╨п╩п╟п╡п╦я┬п╦
 	RETURN
 
-;Подпрограмма: пауза
+;п÷п╬п╢п©я─п╬пЁя─п╟п╪п╪п╟: п©п╟я┐п╥п╟
 PAUSE:
 	MOV	#177777, R5
 1$:	NOP
